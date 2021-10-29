@@ -35,9 +35,9 @@ The idea here, is to sort a classroom worth of papers into piles quickly, so tha
 
 ## 5. Algorithms & Machine Learning
 
-I tested several different classification models from [SciKit Learn](https://scikit-learn.org/stable/). After finding a few that were close in performance, cross-validation and tuning demonstrated that Support Vector Machines were the best model.
+I tested several different classification models from [SciKit Learn](https://scikit-learn.org/stable/). After finding a few that were close in performance, cross-validation and tuning demonstrated that a Support Vector Machine was the best model.
 
->***NOTE:** Beyond accuracy, the most important metric was precision. I wanted as few false positives as possible. That way, on the papers the model does mis-classify, teachers are more likley to be giving points back instead of taking them away.*
+>***NOTE:** Beyond accuracy, the most important metric was precision. I wanted as few false positives as possible. That way, on the papers the model does mis-classify, teachers are more likley to be giving points back instead of taking them away. SVM had both the highest accuracy and the highest precision, making it a pretty easy decision.*
 
 Afterwards, the papers are processed with Latent Dirichlet Allocation to determine paragraph topics. The topics are then assessed with a pre-trained Word2Vec model to assess their similarities. Similar paragraphs don't get any feedback; dis-similar paragraphs get suggested feedback ("These paragraphs may need clarification in how the topics are connected.")
 
@@ -45,7 +45,7 @@ Afterwards, the papers are processed with Latent Dirichlet Allocation to determi
 
 **Coldstart Threshold**: Recommender systems have a unique issue: *what does the algorithm recommend to new users when it has very little or no prior data?* 
 
-While not a recommneder system, the goal here is to have a teacher train the model in the way that the teacher likes to grade papers.
+While not a recommender system, the goal here is to eventually have a teacher train the model in the way that the teacher likes to grade papers. Initially, they'll have a pre-trained model, but eventually, I hope to add a reinforement learning type of model, where teachers can apply feedback that iterates the model to suit their needs better.
 
 ## 7. Predictions
 
