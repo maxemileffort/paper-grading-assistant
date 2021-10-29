@@ -17,7 +17,7 @@ Placeholder
 
 ## 4. EDA
 
-Placeholder
+Data was explored as the project went on, so it's in a lot of different places.
 
 <!-- ![eda_conclusion](./readme_files/eda_conclusion.jpg) -->
 
