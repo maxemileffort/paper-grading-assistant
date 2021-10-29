@@ -1,25 +1,35 @@
 ![cover_photo](./readme_files/cover_photo.jpg)
 # Paper Grading Assistant
 
-*Placeholder*
+*Grading is the one of the top problems facing teachers in the US (Source: my teacher wife.) While it varies from subject to subject, many teachers spend upwards of several hours checking on the work of their students, to make sure they are growing and becoming prepared for their years ahead.*
+
+*Because they are often times over-worked and under-paid, the goal of this project is to help teachers reclaim some of that time and money by making the paper grading process more efficient. The result of doing that leads to more meaningful feedback for the students and more productive use of time for the teachers.*
 
 ## 1. Data
 
-Placeholder
+For this, there are 2 sources of data. The first: [Hewlett Foundation Kaggle Competition](https://www.kaggle.com/c/asap-aes/data). Here, I used this data to sort of prove the concept as well as test the idea.
 
-## 2. Method
+The other set of data is from my teacher wife, who provided some student papers in order to test the idea in more of a production-esque setting.
 
-Placeholder
-
-## 3. Data Cleaning 
+## 2. Data Cleaning
 
 Placeholder
 
-## 4. EDA
+## 3. EDA
 
-Data was explored as the project went on, so it's in a lot of different places.
+Data was explored more and more as the project went on, so EDA is in a lot of different places. The following are some of the interesting snippets pulled from the ongoing analysis, as well as where that can be found.
 
 <!-- ![eda_conclusion](./readme_files/eda_conclusion.jpg) -->
+
+## 4. Method
+
+The dataset has different scales for each essay set, which were all standardized as a score out of 100. These were then all given a "Letter Grade" (A, B, C, D, or F), which is the class that we are trying to predict.
+
+Additionally, Topic Modeling was used to examine the similarities between paragraphs. That was used to help a teacher leave feedback about how well a student organizes his thoughts.
+
+More on these explained in the next section.
+
+The idea here, is to sort a class of papers into piles quickly, so that teachers will know who needs more attention vs the ones that just need quick input. English teachers generally still want to read the papers, and this doesn't take away from that. Instead it helps teachers focus on the enjoyable parts, and makes the grading process more efficient and effective.
 
 ## 5. Algorithms & Machine Learning
 
