@@ -3,7 +3,7 @@
 import glob, os, re, shutil, string
 
 from sklearn import preprocessing
-from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS, CountVectorizer
 from sklearn.svm import SVC
 import nltk
 from nltk.tokenize import TweetTokenizer, RegexpTokenizer
@@ -202,49 +202,14 @@ def unique_words(text):
 def word_count(text):
     return len(str(text).split(' '))
 
-def replicate_csv(data):
-    # recreating csv from modeling_ii notebook
-    data['tokenized_essay'] = data.essay.apply(process_text)
+def process_df(data, max_score):
+    """ Turns essays into a DF that can be used to train a classificatio model. """
     data['word_count'] = data.essay.apply(word_count)
+    data['tokenized_essay'] = data.essay.apply(process_text)
+    data['token_count'] = data.tokenized_essay.apply(len)
     data = data.fillna(0)
-    data['max_score'] = 0
-    essay_sets = data.essay_set.unique()
-    for set_ in essay_sets:
-        if set_ == 1:
-            data.loc[data.essay_set == set_, 'max_score'] = 12
-        if set_ == 2:
-            data.loc[data.essay_set == set_, 'max_score'] = 10
-        if set_ == 3 or set_ == 4:
-            data.loc[data.essay_set == set_, 'max_score'] = 3
-        if set_ == 5 or set_ == 6:
-            data.loc[data.essay_set == set_, 'max_score'] = 4
-        if set_ == 7:
-            data.loc[data.essay_set == set_, 'max_score'] = 30
-        if set_ == 8:
-            data.loc[data.essay_set == set_, 'max_score'] = 60
-    data['pct_score'] = 0
-    for set_ in essay_sets:
-        if set_ == 2:
-            data.loc[data.essay_set == set_, 'pct_score'] = (data.loc[data.essay_set==set_,'domain1_score'] \
-                                                       + data.loc[data.essay_set==set_,'domain2_score']) \
-                                                       / data.loc[data.essay_set==set_,'max_score']
-            continue
-        else:
-            data.loc[data.essay_set == set_, 'pct_score'] = data.loc[data.essay_set==set_,'domain1_score'] \
-                                                       / data.loc[data.essay_set==set_,'max_score']
-    data['class'] = 1
-    for x in range(len(data)):
-        if (data.pct_score[x]) >= .9:
-            data['class'][x] = 5
-            continue
-        elif data.pct_score[x] >= .8 and data.pct_score[x] < .9:
-            data['class'][x] = 4
-            continue
-        elif data.pct_score[x] >= .7 and data.pct_score[x] < .8:
-            data['class'][x] = 3
-            continue
-        elif data.pct_score[x] >= .6 and data.pct_score[x] < .7:
-            data['class'][x] = 2
+    data['max_score'] = max_score
+    data['actual_score'] = 0
     return data
 
 def get_model():
@@ -433,11 +398,12 @@ def get_text(filename):
         fullText.append(para.text)
     return '\n'.join(fullText)
 
-def grade_papers(uploadedfile): 
-    # first, empty data folder
-    empty_data_folder()
-    # save file and extract contents
-    filename = save_uploaded_file(uploadedfile)
+def essay2df(essay):
+    paragraphs = essay.split('\n')
+    df = pd.DataFrame(paragraphs, columns=['paragraphs'])
+    return df
+
+def extract_papers(filename):
     import zipfile
     with zipfile.ZipFile(filename, 'r') as zip_ref:
         zip_ref.extractall('./data')
@@ -450,18 +416,41 @@ def grade_papers(uploadedfile):
     # go into path and create dataframe out of docx files
     path_ = os.path.join(dir_name, os.listdir(dir_name)[0])
     files = os.listdir(path_)
-    print(files)
-
     doc_lst = []
     for item in files:
-
         document = get_text(path_+'/'+item)
         doc_lst.append([item, document])
     df = pd.DataFrame(doc_lst, columns=['file', 'essay'])
-    # run through grading model
-    clf = SVC(C= 0.01, gamma='scale', kernel='rbf')
+    return df
+
+def grade_papers(uploadedfile, max_score): 
+    # first, empty data folder
+    empty_data_folder()
+    # save file 
+    filename = save_uploaded_file(uploadedfile)
+    # extract contents
+    df = extract_papers(filename)
+    # pre-process data
+    df = process_df(df, max_score)
+    # # setup bag of words
+    # tf_vectorizer = CountVectorizer(max_df=0.85, 
+    #                             min_df=3, 
+    #                             max_features=1000, 
+    #                             stop_words='english', 
+    #                             preprocessor=' '.join)
+    # tf = tf_vectorizer.fit_transform(df['tokenized_essay'])
+    # tf_feature_names = tf_vectorizer.get_feature_names()
+    # # train models
+    # clf = SVC(C= 0.01, gamma='scale', kernel='rbf')
+
+    # # predict grades
     # run through topic modeling model
 
+    # drop columns teachers won't use
+    drop_cols = ['tokenized_essay', 'token_count']
+    df = df.drop(columns=drop_cols)
     # empty data folder again
     empty_data_folder()
     return df
+
+# def train_basic_models():

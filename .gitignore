@@ -1,3 +1,4 @@
 *.kvmodel*
 __pycache__
 streamlit/data
+.joblib
