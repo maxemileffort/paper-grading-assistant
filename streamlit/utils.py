@@ -209,7 +209,7 @@ def process_df(data, max_score):
     data['token_count'] = data.tokenized_essay.apply(len)
     data = data.fillna(0)
     data['max_score'] = max_score
-    data['actual_score'] = 0
+    data['letter_grade'] = 0
     return data
 
 def get_model():
@@ -423,7 +423,7 @@ def extract_papers(filename):
     df = pd.DataFrame(doc_lst, columns=['file', 'essay'])
     return df
 
-def grade_papers(uploadedfile, max_score): 
+def grade_papers(uploadedfile, max_score, new_model=False): 
     # first, empty data folder
     empty_data_folder()
     # save file 
@@ -432,18 +432,16 @@ def grade_papers(uploadedfile, max_score):
     df = extract_papers(filename)
     # pre-process data
     df = process_df(df, max_score)
-    # # setup bag of words
-    # tf_vectorizer = CountVectorizer(max_df=0.85, 
-    #                             min_df=3, 
-    #                             max_features=1000, 
-    #                             stop_words='english', 
-    #                             preprocessor=' '.join)
-    # tf = tf_vectorizer.fit_transform(df['tokenized_essay'])
-    # tf_feature_names = tf_vectorizer.get_feature_names()
-    # # train models
-    # clf = SVC(C= 0.01, gamma='scale', kernel='rbf')
-
-    # # predict grades
+    # train models
+    if new_model:
+        # TODO replace this with the teacher's model
+        clf, tf_vec = train_teachers_models()
+    else:
+        clf, tf_vec = get_pretrained_models()
+    # predict grades
+    tf = tf_vec.transform(df.tokenized_essay.apply(" ".join))
+    y_pred = clf.predict(tf)
+    df['letter_grade'] = y_pred
     # run through topic modeling model
 
     # drop columns teachers won't use
@@ -453,4 +451,66 @@ def grade_papers(uploadedfile, max_score):
     empty_data_folder()
     return df
 
-# def train_basic_models():
+def train_teachers_models(t_df):
+    # TODO finish this
+    t_df = replicate_csv(t_df)
+    tf_vectorizer = CountVectorizer(max_df=0.85, 
+                                min_df=2, 
+                                max_features=1000, 
+                                stop_words='english') 
+    tf = tf_vectorizer.fit_transform(t_df['tokenized_essay'])
+    X_tf = tf
+    y = t_df['letter_grade']
+
+def get_pretrained_models():
+    from joblib import load
+    clf = load('./models/kaggle_trained_clf_model.joblib')
+    tf_vec = load('./models/kaggle_trained_tf_model.joblib')
+    return clf, tf_vec
+
+def replicate_csv(data):
+    # recreating csv from modeling_ii notebook
+    cols_to_drop = [col for col in data.columns if 'rater' in col]
+    data = data.drop(columns=cols_to_drop)
+    data['tokenized_essay'] = data.essay.apply(process_text)
+    data['word_count'] = data.essay.apply(word_count)
+    data = data.fillna(0)
+    data['max_score'] = 0
+    essay_sets = data.essay_set.unique()
+    for set_ in essay_sets:
+        if set_ == 1:
+            data.loc[data.essay_set == set_, 'max_score'] = 12
+        if set_ == 2:
+            data.loc[data.essay_set == set_, 'max_score'] = 10
+        if set_ == 3 or set_ == 4:
+            data.loc[data.essay_set == set_, 'max_score'] = 3
+        if set_ == 5 or set_ == 6:
+            data.loc[data.essay_set == set_, 'max_score'] = 4
+        if set_ == 7:
+            data.loc[data.essay_set == set_, 'max_score'] = 30
+        if set_ == 8:
+            data.loc[data.essay_set == set_, 'max_score'] = 60
+    data['pct_score'] = 0
+    for set_ in essay_sets:
+        if set_ == 2:
+            data.loc[data.essay_set == set_, 'pct_score'] = (data.loc[data.essay_set==set_,'domain1_score'] \
+                                                       + data.loc[data.essay_set==set_,'domain2_score']) \
+                                                       / data.loc[data.essay_set==set_,'max_score']
+            continue
+        else:
+            data.loc[data.essay_set == set_, 'pct_score'] = data.loc[data.essay_set==set_,'domain1_score'] \
+                                                       / data.loc[data.essay_set==set_,'max_score']
+    data['class'] = 1
+    for x in range(len(data)):
+        if (data.pct_score[x]) >= .9:
+            data['class'][x] = 5
+            continue
+        elif data.pct_score[x] >= .8 and data.pct_score[x] < .9:
+            data['class'][x] = 4
+            continue
+        elif data.pct_score[x] >= .7 and data.pct_score[x] < .8:
+            data['class'][x] = 3
+            continue
+        elif data.pct_score[x] >= .6 and data.pct_score[x] < .7:
+            data['class'][x] = 2
+    return data

@@ -64,10 +64,11 @@ if st.session_state['grading'] == False and st.session_state['uploaded_file'] !=
 
 if st.session_state['grading'] == True:
     with stats_container:
+        uf = st.session_state['uploaded_file']
+        pp = int(st.session_state['pts_possible'])
         st.write("") # spacer
         st.subheader("Grading these papers...")
-        extracted_papers = grade_papers(st.session_state['uploaded_file'], 
-                                        int(st.session_state['pts_possible']))
+        extracted_papers = grade_papers(uf, pp)
         st.dataframe(extracted_papers)
 
         @st.cache
