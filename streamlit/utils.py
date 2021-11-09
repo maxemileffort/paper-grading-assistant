@@ -1,9 +1,10 @@
 # Adapted from https://github.com/robsalgado/personal_data_science_projects/blob/master/topic_modeling_nmf/nlp_topic_utils.ipynb
 
-from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+import glob, os, re, shutil, string
+
 from sklearn import preprocessing
-import string
-import re
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+from sklearn.svm import SVC
 import nltk
 from nltk.tokenize import TweetTokenizer, RegexpTokenizer
 nltk.download('stopwords')
@@ -12,6 +13,8 @@ nltk.download('wordnet')
 from nltk.stem.wordnet import WordNetLemmatizer
 import pandas as pd
 import numpy as np
+import streamlit as st
+import docx
 
 # Contraction map
 c_dict = {
@@ -408,4 +411,57 @@ def generate_stack_of_papers(len_of_papers = 2,
         stack_of_papers[i] = '\n'.join(stack_of_papers[i])
         
     return stack_of_papers
-    
+
+def empty_data_folder():
+    dir_name = "./data"
+    files = os.listdir(dir_name)
+    for item in files:
+        shutil.rmtree(os.path.join(dir_name, item))
+    return
+
+def save_uploaded_file(uploadedfile):
+    filename = os.path.join("./data",uploadedfile.name)
+    with open(filename,"wb") as f:
+        f.write(uploadedfile.getbuffer())
+    st.success("Successfully uploaded papers")
+    return filename
+
+def get_text(filename):
+    doc = docx.Document(filename)
+    fullText = []
+    for para in doc.paragraphs:
+        fullText.append(para.text)
+    return '\n'.join(fullText)
+
+def grade_papers(uploadedfile): 
+    # first, empty data folder
+    empty_data_folder()
+    # save file and extract contents
+    filename = save_uploaded_file(uploadedfile)
+    import zipfile
+    with zipfile.ZipFile(filename, 'r') as zip_ref:
+        zip_ref.extractall('./data')
+    # delete zip file
+    dir_name = "./data"
+    files = os.listdir(dir_name)
+    for item in files:
+        if item.endswith(".zip"):
+            os.remove(os.path.join(dir_name, item))
+    # go into path and create dataframe out of docx files
+    path_ = os.path.join(dir_name, os.listdir(dir_name)[0])
+    files = os.listdir(path_)
+    print(files)
+
+    doc_lst = []
+    for item in files:
+
+        document = get_text(path_+'/'+item)
+        doc_lst.append([item, document])
+    df = pd.DataFrame(doc_lst, columns=['file', 'essay'])
+    # run through grading model
+    clf = SVC(C= 0.01, gamma='scale', kernel='rbf')
+    # run through topic modeling model
+
+    # empty data folder again
+    empty_data_folder()
+    return df
