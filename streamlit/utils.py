@@ -222,6 +222,7 @@ def create_models(df):
         gensim_model = api.load("glove-wiki-gigaword-300")
         gensim_model.save('./models/mywordvecs.kvmodel')
     # tf model
+    print(df)
     tokenized_text = df['tokenized_essay']
     try:
         tf_vectorizer = load('./models/kaggle_pretrained_tf_model.joblib')
