@@ -47,14 +47,15 @@ def setup_folders():
         else:
             os.mkdir(f'./{folder}')
     
-    url='https://github.com/maxemileffort/paper-grading-assistant/blob/master/streamlit/sample_data/processed_essays.csv'
+    url='https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/sample_data/processed_essays.csv'
     df = pd.read_csv(url, sep=",", error_bad_lines=False, header=0, index_col=0)
+    # print(df)
     create_models(df)
     st.session_state['models_loaded'] = True
     empty_data_folder()
 
 if st.session_state['uploaded_file'] == False and st.session_state['models_loaded'] == False:
-    with st.spinner("Warming up the grading robots... Grab some coffee, this could take a minute or two..."):
+    with st.spinner("Warming up the grading robots... Grab some coffee, this could take a minute or two."):
         setup_folders()
 
 if st.session_state['uploaded_file'] == False:
