@@ -223,17 +223,23 @@ def create_models(df):
         gensim_model.save('./models/mywordvecs.kvmodel')
     # tf model
     tokenized_text = df['tokenized_essay']
-    no_features = 1000
-    tf_vectorizer = CountVectorizer(max_df=0.85, 
-                                    min_df=1, 
-                                    max_features=no_features, 
-                                    #stop_words='english', 
-                                    preprocessor=' '.join)
+    try:
+        tf_vectorizer = load('./models/kaggle_pretrained_tf_model.joblib')
+    except:
+        no_features = 1000
+        tf_vectorizer = CountVectorizer(max_df=0.85, 
+                                        min_df=1, 
+                                        max_features=no_features, )
+                                        #stop_words='english', 
+                                        # preprocessor=' '.join)
     tf = tf_vectorizer.fit_transform(tokenized_text)
     y = df['class']
     # clf model
-    clf = SVC()
-    clf.fit(tf,y)
+    try:
+        clf = load('./models/kaggle_pretrained_clf_model.joblib')
+    except:
+        clf = SVC()
+        clf.fit(tf,y)
     # save tf and clf
     dump(tf_vectorizer, './models/kaggle_pretrained_tf_model.joblib')
     dump(clf, './models/kaggle_pretrained_clf_model.joblib')
@@ -412,7 +418,7 @@ def grade_papers(uploadedfile, max_score, new_model=False):
         p_topics_len = len(p_topics)
         freq = high_num_same_top / p_topics_len
         # print("frequency of topic with highest occurrences:", freq)
-        model = create_models()
+        model = get_gensim_model()
         lst_sims = []
         for i in range(p_topics_len):
             try:
@@ -458,8 +464,8 @@ def train_teachers_models(t_df):
     y = t_df['letter_grade']
 
 def get_pretrained_models():
-    clf = load('./models/kaggle_trained_clf_model.joblib')
-    tf_vec = load('./models/kaggle_trained_tf_model.joblib')
+    clf = load('./models/kaggle_pretrained_clf_model.joblib')
+    tf_vec = load('./models/kaggle_pretrained_tf_model.joblib')
     return clf, tf_vec
 
 def replicate_csv(data):

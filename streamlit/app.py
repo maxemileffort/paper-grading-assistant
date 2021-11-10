@@ -12,7 +12,7 @@ stats_container = st.container()
 footer_container = st.container()
 
 # State
-states = ['grading', 'uploaded_file', 'pts_possible']
+states = ['grading', 'uploaded_file', 'pts_possible', 'models_loaded']
 for state in states:
     if state not in st.session_state:
         st.session_state[state] = False
@@ -49,10 +49,15 @@ def setup_folders():
     
     df = pd.read_csv('.\sample_data\processed_essays.csv')
     create_models(df)
+    st.session_state['models_loaded'] = True
+    empty_data_folder()
+
+if st.session_state['uploaded_file'] == False and st.session_state['models_loaded'] == False:
+    with st.spinner("Warming up the grading robots... Grab some coffee, this could take a minute or two..."):
+        setup_folders()
 
 if st.session_state['uploaded_file'] == False:
     with header_container:
-
         # for example a logo or a image that looks like a website header
         # st.image('logo.png')
 
@@ -97,6 +102,7 @@ if st.session_state['grading'] == True:
         st.download_button(
             label="Download grades as CSV",
             data=csv,
+            on_click=reset_state,
             file_name='graded_papers.csv',
             mime='text/csv')
 
