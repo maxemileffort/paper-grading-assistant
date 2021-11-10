@@ -48,7 +48,7 @@ def setup_folders():
             os.mkdir(f'./{folder}')
     
     url='https://github.com/maxemileffort/paper-grading-assistant/blob/master/streamlit/sample_data/processed_essays.csv'
-    df = pd.read_csv(url, sep=",", error_bad_lines=False, header=0)
+    df = pd.read_csv(url, sep=",", error_bad_lines=False, header=0, index_col=0)
     create_models(df)
     st.session_state['models_loaded'] = True
     empty_data_folder()
