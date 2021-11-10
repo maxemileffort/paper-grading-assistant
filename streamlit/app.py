@@ -48,7 +48,7 @@ def setup_folders():
             os.mkdir(f'./{folder}')
     
     url='https://github.com/maxemileffort/paper-grading-assistant/blob/master/streamlit/sample_data/processed_essays.csv'
-    df = pd.read_csv(url, sep=",", error_bad_lines=False)
+    df = pd.read_csv(url, sep=",", error_bad_lines=False, header=0)
     create_models(df)
     st.session_state['models_loaded'] = True
     empty_data_folder()
@@ -93,6 +93,11 @@ if st.session_state['grading'] == True:
         st.write("") # spacer
         st.subheader("Grading these papers...")
         extracted_papers = grade_papers(uf, pp)
+        st.markdown("## How to use this spreadsheet:")
+        st.markdown("### The next table will have some data that you can use to speed up your grading process. Chaching!")
+        st.markdown("If it looks a little small, hover over the table and a little icon appears on the top right side. Click it, and it will make the table bigger.")
+        st.markdown("Here's a key for some of the columns on the table:")
+        st.markdown("* **")
         st.dataframe(extracted_papers)
 
         @st.cache
