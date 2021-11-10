@@ -97,7 +97,12 @@ if st.session_state['grading'] == True:
         st.markdown("### The next table will have some data that you can use to speed up your grading process. Chaching!")
         st.markdown("If it looks a little small, hover over the table and a little icon appears on the top right side. Click it, and it will make the table bigger.")
         st.markdown("Here's a key for some of the columns on the table:")
-        st.markdown("* **")
+        st.markdown("* **file:** The name of the file graded. Helpful if students put their names in the name of the file.")
+        st.markdown("* **essay:** The submitted essay.")
+        st.markdown("* **essay_id:** Something used internally by the app. May or may not be present.")
+        st.markdown("* **word_count:** Approximate number of words in the essay, not including one-letter words.")
+        st.markdown("* **letter_grade:** The letter grade recommended for the paper.")
+        st.markdown("* **org_score:** Point of possible feedback for the student, based on how well the paragraphs are organized.")
         st.dataframe(extracted_papers)
 
         @st.cache
