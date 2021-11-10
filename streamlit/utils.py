@@ -1,7 +1,7 @@
 # Adapted from https://github.com/robsalgado/personal_data_science_projects/blob/master/topic_modeling_nmf/nlp_topic_utils.ipynb
 
 import glob, os, re, shutil, string
-
+from joblib import dump, load
 from sklearn import preprocessing
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS, CountVectorizer
 from sklearn.svm import SVC
@@ -212,60 +212,44 @@ def process_df(data, max_score):
     data['letter_grade'] = 0
     return data
 
-def get_model():
+def create_models(df):
+    # gensim model
     try:
         from gensim.models import KeyedVectors
-        model = KeyedVectors.load('./models/mywordvecs.kvmodel')
-        return model
+        gensim_model = KeyedVectors.load('./models/mywordvecs.kvmodel')
     except:
         import gensim.downloader as api
-        model = api.load("glove-wiki-gigaword-300")
-        model.save('./models/mywordvecs.kvmodel')
-        return model
+        gensim_model = api.load("glove-wiki-gigaword-300")
+        gensim_model.save('./models/mywordvecs.kvmodel')
+    # tf model
+    tokenized_text = df['tokenized_essay']
+    no_features = 1000
+    tf_vectorizer = CountVectorizer(max_df=0.85, 
+                                    min_df=1, 
+                                    max_features=no_features, 
+                                    #stop_words='english', 
+                                    preprocessor=' '.join)
+    tf = tf_vectorizer.fit_transform(tokenized_text)
+    y = df['class']
+    # clf model
+    clf = SVC()
+    clf.fit(tf,y)
+    # save tf and clf
+    dump(tf_vectorizer, './models/kaggle_pretrained_tf_model.joblib')
+    dump(clf, './models/kaggle_pretrained_clf_model.joblib')
 
-def reduce_words(arr, model, reductions=5):
-    """combine list of words into the one most similar label"""
-    if not model:
-        model = get_model()
-    arr_copy = arr.copy()
-    neg = []
-    for i in range(reductions):
-        try:
-            rem = model.doesnt_match(arr_copy)
-            # neg.append(rem)
-            arr_copy.remove(rem)
-        except:
-            pass
-    # result = model.most_similar_cosmul(positive=arr, negative=neg, topn=10)
-    try:
-        result = model.most_similar(positive=arr_copy, negative=neg)
-    except KeyError as e:
-        # unrecognized key, usually a typo or some proper noun
-        text = str(e)
-        # it's given in single quotes, so find that word
-        pattern = r"'([A-Za-z0-9_\./\\-]*)'"
-        m = re.search(pattern, text)
-        kw = str(m.group()).replace("'", "")
-        arr_copy.remove(kw)
-        arr.remove(kw)
-        try:
-            result = model.most_similar(positive=arr_copy, negative=neg)
-        except:
-            # this block returns a single string, 
-            # which is the reason for the 
-            # isinstance call below
-            result = reduce_words(arr, model, reductions=reductions-1)
-    except:
-        # sometimes the reduction removes all the words from the list
-        # so we re-run with the original list and remove the negative words
-        result = model.most_similar(positive=arr, negative=[])
-    # print('result:', result)
-    if isinstance(result, list):
-        most_similar_key, similarity = result[0]  # look at the first match
-    else:
-        most_similar_key = result
-    # print(f"{most_similar_key}: {similarity:.4f}")
-    return most_similar_key
+def get_gensim_model():
+    from gensim.models import KeyedVectors
+    gensim_model = KeyedVectors.load('./models/mywordvecs.kvmodel')
+    return gensim_model
+
+def get_clf_model():
+    clf_model = load('./models/kaggle_pretrained_clf_model.joblib')
+    return clf_model
+
+def get_tf_model():
+    tf_model = load('./models/kaggle_pretrained_tf_model.joblib')
+    return tf_model
 
 def generate_para_topics(df):
     """ Takes a tokenized paragraph and labels it with a topic. """
@@ -273,7 +257,6 @@ def generate_para_topics(df):
     from sklearn.decomposition import LatentDirichletAllocation
 
     # use or build w2v model
-    model = get_model()
     tokenized_text = df['token_p']
     # LDA can only use raw term counts for LDA because it is a probabilistic graphical model
     no_features = 1000
@@ -348,34 +331,6 @@ def generate_para_topics(df):
     df_topics['top_label'] = label_arr
 
     return df_topics
-
-def generate_stack_of_papers(len_of_papers = 2, 
-                             num_papers = 5, 
-                             sets = 'random', 
-                             essay_set = 5, 
-                             random_state = 0):
-    """ Generates pseudo-papers from the kaggle data set to test logic of grading papers. """
-    from random import seed, randint
-    # seed random number generator
-    seed(random_state)
-    seed(randint(1,25))
-
-    stack_of_papers = []
-    for _ in range(num_papers):
-        short_paper = []
-        for i in range(len_of_papers):
-            short_para = ''
-            value = randint(1, 8) if sets == 'random' else essay_set
-            end_range = len(df_topics.loc[df_topics['essay_set'] == value, 'essay'])
-            value2 = randint(0, end_range)
-            short_para = df_topics.loc[df_topics['essay_set'] == value, 'essay'].iloc[value2]
-            short_paper.append(short_para)
-        stack_of_papers.append(short_paper)
-
-    for i in range(len(stack_of_papers)):
-        stack_of_papers[i] = '\n'.join(stack_of_papers[i])
-        
-    return stack_of_papers
 
 def empty_data_folder():
     dir_name = "./data"
@@ -457,7 +412,7 @@ def grade_papers(uploadedfile, max_score, new_model=False):
         p_topics_len = len(p_topics)
         freq = high_num_same_top / p_topics_len
         # print("frequency of topic with highest occurrences:", freq)
-        model = get_model()
+        model = create_models()
         lst_sims = []
         for i in range(p_topics_len):
             try:
@@ -503,7 +458,6 @@ def train_teachers_models(t_df):
     y = t_df['letter_grade']
 
 def get_pretrained_models():
-    from joblib import load
     clf = load('./models/kaggle_trained_clf_model.joblib')
     tf_vec = load('./models/kaggle_trained_tf_model.joblib')
     return clf, tf_vec
@@ -555,17 +509,3 @@ def replicate_csv(data):
             data['class'][x] = 2
     return data
 
-def setup_folders():
-    from pathlib import Path
-
-    folder_names = ["data", 
-                    "models",
-                    'sample_data'
-                    ]
-
-    for folder in folder_names:
-        _file = Path(f'./{folder}')
-        if _file.exists():
-            pass
-        else:
-            os.mkdir(f'./{folder}')

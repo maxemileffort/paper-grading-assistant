@@ -5,8 +5,6 @@ import numpy as np
 
 from utils import *
 
-setup_folders()
-
 # Containers
 header_container = st.container()
 points_container = st.container()
@@ -34,6 +32,23 @@ def set_pts_possible():
 def set_file():
     st.session_state['uploaded_file'] = st.session_state.uploaded_file_choice
 
+def setup_folders():
+    from pathlib import Path
+
+    folder_names = ["data", 
+                    "models",
+                    'sample_data'
+                    ]
+
+    for folder in folder_names:
+        _file = Path(f'./{folder}')
+        if _file.exists():
+            pass
+        else:
+            os.mkdir(f'./{folder}')
+    
+    df = pd.read_csv('.\sample_data\processed_essays.csv')
+    create_models(df)
 
 if st.session_state['uploaded_file'] == False:
     with header_container:

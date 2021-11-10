@@ -1,3 +1,4 @@
-*.kvmodel*
+./streamlit/models
+./streamlit/data
 __pycache__
-.joblib
+*.joblib
