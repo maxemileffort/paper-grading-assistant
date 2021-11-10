@@ -5,6 +5,8 @@ import numpy as np
 
 from utils import *
 
+setup_folders()
+
 # Containers
 header_container = st.container()
 points_container = st.container()

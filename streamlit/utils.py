@@ -554,3 +554,18 @@ def replicate_csv(data):
         elif data.pct_score[x] >= .6 and data.pct_score[x] < .7:
             data['class'][x] = 2
     return data
+
+def setup_folders():
+    from pathlib import Path
+
+    folder_names = ["data", 
+                    "models",
+                    'sample_data'
+                    ]
+
+    for folder in folder_names:
+        _file = Path(f'./{folder}')
+        if _file.exists():
+            pass
+        else:
+            os.mkdir(f'./{folder}')
