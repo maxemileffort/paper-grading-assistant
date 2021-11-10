@@ -1,8 +1,4 @@
 import streamlit as st
-from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
-from sklearn import preprocessing
-import string
-import re
 
 import pandas as pd
 import numpy as np
@@ -13,6 +9,7 @@ from utils import *
 header_container = st.container()
 points_container = st.container()
 stats_container = st.container()
+footer_container = st.container()
 
 # State
 states = ['grading', 'uploaded_file', 'pts_possible']
@@ -21,6 +18,10 @@ for state in states:
         st.session_state[state] = False
 
 # Methods
+def reset_state():
+    for state in states:
+        st.session_state[state] = False
+
 def start_grading():
     st.session_state['grading'] = True
     st.session_state['pts_possible'] = st.session_state.pts_possible_choice
@@ -81,3 +82,7 @@ if st.session_state['grading'] == True:
             data=csv,
             file_name='graded_papers.csv',
             mime='text/csv')
+
+if st.session_state['uploaded_file'] != False:
+    with footer_container:
+        st.button("< Start over", on_click=reset_state)

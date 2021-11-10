@@ -215,12 +215,12 @@ def process_df(data, max_score):
 def get_model():
     try:
         from gensim.models import KeyedVectors
-        model = KeyedVectors.load('mywordvecs.kvmodel')
+        model = KeyedVectors.load('./models/mywordvecs.kvmodel')
         return model
     except:
         import gensim.downloader as api
         model = api.load("glove-wiki-gigaword-300")
-        model.save('mywordvecs.kvmodel')
+        model.save('./models/mywordvecs.kvmodel')
         return model
 
 def reduce_words(arr, model, reductions=5):
@@ -280,7 +280,7 @@ def generate_para_topics(df):
     tf_vectorizer = CountVectorizer(max_df=0.85, 
                                     min_df=1, 
                                     max_features=no_features, 
-                                    stop_words='english', 
+                                    #stop_words='english', 
                                     preprocessor=' '.join)
     tf = tf_vectorizer.fit_transform(tokenized_text) # tf embeddings
     # print("tf: \n", tf)
@@ -430,6 +430,7 @@ def grade_papers(uploadedfile, max_score, new_model=False):
     filename = save_uploaded_file(uploadedfile)
     # extract contents
     df = extract_papers(filename)
+    df['essay_id'] = range(1,len(df)+1)
     # pre-process data
     df = process_df(df, max_score)
     # train models
@@ -442,10 +443,49 @@ def grade_papers(uploadedfile, max_score, new_model=False):
     tf = tf_vec.transform(df.tokenized_essay.apply(" ".join))
     y_pred = clf.predict(tf)
     df['letter_grade'] = y_pred
+    df['org_score'] = 0
     # run through topic modeling model
+    lst_coefs=[]
+    for i in range(len(df)):
+        p = essay2df(df.essay.iloc[i])
+        p['para_id'] = range(1,len(p)+1)
+        p['word_count'] = p.paragraphs.apply(word_count)
+        p['token_p'] = p.paragraphs.apply(process_text)
+        p['token_count'] = p.token_p.apply(len)
+        p_topics = generate_para_topics(p)
+        high_num_same_top = p_topics['top_label'].value_counts()[0]
+        p_topics_len = len(p_topics)
+        freq = high_num_same_top / p_topics_len
+        # print("frequency of topic with highest occurrences:", freq)
+        model = get_model()
+        lst_sims = []
+        for i in range(p_topics_len):
+            try:
+                # print(p_topics['top_label'].iloc[i], p_topics['top_label'].iloc[i+1])
+                sim = model.n_similarity(p_topics['top_label'].iloc[i], p_topics['top_label'].iloc[i+1])
+                # print(sim)
+                lst_sims.append(sim)
+            except:
+                # print(p_topics['top_label'].iloc[i], p_topics['top_label'].iloc[0])
+                sim = model.n_similarity(p_topics['top_label'].iloc[i], p_topics['top_label'].iloc[0])
+                # print(sim)
+                lst_sims.append(sim)
+        sim_mean = np.array(lst_sims).mean()
+        # print("mean of similarities:", sim_mean)
+        
+        # relating frequency of the most common topic to the 
+        # mean of similarities bewtween all of the topics
 
+        # most common topic * mean of similarities between paragraph topics. 
+        # that way, if they are both high, the score is high. if one is 
+        # low, there's a middle range, and if they are both low, then that 
+        # shows big problems. multiplied so theres a bigger range of values vs addition.
+        my_coef = round(freq * sim_mean, 4)
+        # print("my_coef:", my_coef)
+        lst_coefs.append(my_coef) 
+    df['org_score'] = lst_coefs
     # drop columns teachers won't use
-    drop_cols = ['tokenized_essay', 'token_count']
+    drop_cols = ['tokenized_essay', 'token_count', 'max_score']
     df = df.drop(columns=drop_cols)
     # empty data folder again
     empty_data_folder()
