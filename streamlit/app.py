@@ -1,15 +1,17 @@
 import streamlit as st
+from PIL import Image
 
 import pandas as pd
 import numpy as np
 
 from utils import *
 
-# Containers
-header_container = st.container()
-points_container = st.container()
-stats_container = st.container()
-footer_container = st.container()
+# Config
+im = Image.open(".\images\984102_avatar_casual_male_man_person_icon.ico")
+st.set_page_config(
+    page_title="I'm Skip, your grading assistant.",
+    page_icon=im,
+)
 
 # State
 states = ['grading', 'uploaded_file', 'pts_possible', 'models_loaded']
@@ -54,15 +56,20 @@ def setup_folders():
     st.session_state['models_loaded'] = True
     empty_data_folder()
 
+
+# Containers
+header_container = st.container()
+points_container = st.container()
+stats_container = st.container()
+footer_container = st.container()
+
+# App
 if st.session_state['uploaded_file'] == False and st.session_state['models_loaded'] == False:
     with st.spinner("Warming up the grading robots... Grab some coffee, this could take a minute or two."):
         setup_folders()
 
 if st.session_state['uploaded_file'] == False:
     with header_container:
-        # for example a logo or a image that looks like a website header
-        # st.image('logo.png')
-
         # different levels of text you can include in your app
         st.title("Hi! I'm Skip, your grading assistant.")
         st.header("Ready to take back your planning period?")
