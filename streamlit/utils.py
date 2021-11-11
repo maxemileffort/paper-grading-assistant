@@ -557,7 +557,7 @@ def set_config():
     # image_url = 'https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/images/984102_avatar_casual_male_man_person_icon.ico'
     # filename = image_url.split("/")[-1]
 
-    dir_ = '/app/paper-grading-assistant/streamlit/'
+    base_dir = '/app/paper-grading-assistant/streamlit/'
 
     # r = requests.get(image_url, stream = True)
     # # Check if the image was retrieved successfully
@@ -573,7 +573,7 @@ def set_config():
     #         with open(dir_+"images/"+filename,'wb') as f:
     #             shutil.copyfileobj(r.raw, f)
 
-    im = Image.open(dir_+"\images\984102_avatar_casual_male_man_person_icon.ico")
+    im = Image.open(base_dir+"/images/984102_avatar_casual_male_man_person_icon.ico")
     st.set_page_config(
         page_title="I'm Skip, your grading assistant.",
         page_icon=im,
