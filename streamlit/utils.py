@@ -557,7 +557,7 @@ def set_config():
     # image_url = 'https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/images/984102_avatar_casual_male_man_person_icon.ico'
     # filename = image_url.split("/")[-1]
 
-    # dir_ = '/app/paper-grading-assistant/streamlit/'
+    dir_ = '/app/paper-grading-assistant/streamlit/'
 
     # r = requests.get(image_url, stream = True)
     # # Check if the image was retrieved successfully
