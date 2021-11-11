@@ -1,30 +1,12 @@
 import streamlit as st
-from PIL import Image
 
 import numpy as np
 import pandas as pd
-import requests
 
 from utils import *
 
 # Config
-image_url = 'https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/images/984102_avatar_casual_male_man_person_icon.ico'
-filename = image_url.split("/")[-1]
-r = requests.get(image_url, stream = True)
-# Check if the image was retrieved successfully
-if r.status_code == 200:
-    # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
-    r.raw.decode_content = True
-    
-    # Open a local file with wb ( write binary ) permission.
-    with open("./images/"+filename,'wb') as f:
-        shutil.copyfileobj(r.raw, f)
-
-im = Image.open(".\images\984102_avatar_casual_male_man_person_icon.ico")
-st.set_page_config(
-    page_title="I'm Skip, your grading assistant.",
-    page_icon=im,
-)
+set_config()
 
 # State
 states = ['grading', 'uploaded_file', 'pts_possible', 'models_loaded']
@@ -32,7 +14,7 @@ for state in states:
     if state not in st.session_state:
         st.session_state[state] = False
 
-# Methods
+# State managers
 def reset_state():
     for state in states:
         st.session_state[state] = False
@@ -47,30 +29,6 @@ def set_pts_possible():
 def set_file():
     st.session_state['uploaded_file'] = st.session_state.uploaded_file_choice
 
-def setup_folders():
-    from pathlib import Path
-
-    folder_names = ["data", 
-                    "models",
-                    'sample_data',
-                    'images'
-                    ]
-
-    for folder in folder_names:
-        _file = Path(f'./{folder}')
-        if _file.exists():
-            pass
-        else:
-            os.mkdir(f'./{folder}')
-    
-    url='https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/sample_data/processed_essays.csv'
-    df = pd.read_csv(url, sep=",", error_bad_lines=False, header=0, index_col=0)
-    # print(df)
-    create_models(df)
-    st.session_state['models_loaded'] = True
-    empty_data_folder()
-
-
 # Containers
 header_container = st.container()
 points_container = st.container()
@@ -81,7 +39,7 @@ footer_container = st.container()
 if st.session_state['uploaded_file'] == False and st.session_state['models_loaded'] == False:
     with st.spinner("Warming up the grading robots... Grab some coffee, this could take a minute or two."):
         setup_folders()
-
+        
 if st.session_state['uploaded_file'] == False:
     with header_container:
         # different levels of text you can include in your app
@@ -118,13 +76,13 @@ if st.session_state['grading'] == True:
         st.markdown("## How to use this spreadsheet:")
         st.markdown("### The next table will have some data that you can use to speed up your grading process. Chaching!")
         st.markdown("If it looks a little small, hover over the table and a little icon appears on the top right side. Click it, and it will make the table bigger.")
-        st.markdown("Here's a key for some of the columns on the table:")
-        st.markdown("* **file:** The name of the file graded. Helpful if students put their names in the name of the file.")
-        st.markdown("* **essay:** The submitted essay.")
-        st.markdown("* **essay_id:** Something used internally by the app. May or may not be present.")
-        st.markdown("* **word_count:** Approximate number of words in the essay, not including one-letter words.")
-        st.markdown("* **letter_grade:** The letter grade recommended for the paper.")
-        st.markdown("* **org_score:** Point of possible feedback for the student, based on how well the paragraphs are organized.")
+        st.markdown("Here's a key for the columns on the table:")
+        st.markdown("* **File:** The name of the file graded. Helpful if students put their own names in the actual file name.")
+        st.markdown("* **Essay:** The submitted essay.")
+        st.markdown("* **Word Count:** Approximate number of words in the essay, not including one-letter words.")
+        st.markdown("* **Page Count:** Approximate number of pages in this paper. This column is based on the idea that pages are about 250 words when double-spaced.")
+        st.markdown("* **Letter Grade:** The letter grade recommended for the paper.")
+        st.markdown("* **Organization Score:** Possible feedback for the student, based on how well the paragraphs are organized.")
         st.dataframe(extracted_papers)
 
         @st.cache

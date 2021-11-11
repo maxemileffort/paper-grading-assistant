@@ -1,7 +1,10 @@
 # Adapted from https://github.com/robsalgado/personal_data_science_projects/blob/master/topic_modeling_nmf/nlp_topic_utils.ipynb
 
 import glob, os, re, shutil, string
+from pandas.core.indexing import convert_from_missing_indexer_tuple
+import requests
 from joblib import dump, load
+from PIL import Image
 from sklearn import preprocessing
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS, CountVectorizer
 from sklearn.svm import SVC
@@ -205,6 +208,7 @@ def word_count(text):
 def process_df(data, max_score):
     """ Turns essays into a DF that can be used to train a classificatio model. """
     data['word_count'] = data.essay.apply(word_count)
+    data['page_count'] = data.word_count.apply(lambda x: str(round(x/250, 1)).rstrip('0'))
     data['tokenized_essay'] = data.essay.apply(process_text)
     data['token_count'] = data.tokenized_essay.apply(len)
     data = data.fillna(0)
@@ -385,6 +389,29 @@ def extract_papers(filename):
     df = pd.DataFrame(doc_lst, columns=['file', 'essay'])
     return df
 
+def swap_grade(grade):
+    if grade == 5:
+        grade = 'A'
+    elif grade == 4:
+        grade = 'B'
+    elif grade == 3:
+        grade = 'C'
+    elif grade == 2:
+        grade = 'D'
+    else:
+        grade = 'F'
+    return grade
+
+def fix_org_score(score):
+    comment = ''
+    if score >= 0.7:
+        comment = "Probably just needs some small tweaks."
+    elif score >= 0.4 and score < 0.7:
+        comment = "Organization is clear but needs work."
+    else:
+        comment = "Organization makes the paper difficult to read."
+    return comment
+
 def grade_papers(uploadedfile, max_score, new_model=False): 
     # first, empty data folder
     empty_data_folder()
@@ -447,8 +474,18 @@ def grade_papers(uploadedfile, max_score, new_model=False):
         lst_coefs.append(my_coef) 
     df['org_score'] = lst_coefs
     # drop columns teachers won't use
-    drop_cols = ['tokenized_essay', 'token_count', 'max_score']
+    drop_cols = ['tokenized_essay', 'token_count', 'max_score', 'essay_id']
     df = df.drop(columns=drop_cols)
+    # swap letters for numbers on letter_grade column
+    df['letter_grade'] = df['letter_grade'].apply(swap_grade)
+    # make sense of org_score
+    df['org_score'] = df['org_score'].apply(fix_org_score)
+    df = df.rename(columns={'org_score': "Organization Score", 
+                            "letter_grade":"Letter Grade",
+                            "file":"File",
+                            "page_count":"Page Count",
+                            "essay":"Essay",
+                            "word_count":"Word Count"})
     # empty data folder again
     empty_data_folder()
     return df
@@ -516,3 +553,46 @@ def replicate_csv(data):
             data['class'][x] = 2
     return data
 
+def set_config():
+    image_url = 'https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/images/984102_avatar_casual_male_man_person_icon.ico'
+    filename = image_url.split("/")[-1]
+    r = requests.get(image_url, stream = True)
+    # Check if the image was retrieved successfully
+    if r.status_code == 200:
+        # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+        r.raw.decode_content = True
+        
+        # Open a local file with wb ( write binary ) permission.
+        with open("./images/"+filename,'wb') as f:
+            shutil.copyfileobj(r.raw, f)
+
+    im = Image.open(".\images\984102_avatar_casual_male_man_person_icon.ico")
+    st.set_page_config(
+        page_title="I'm Skip, your grading assistant.",
+        page_icon=im,
+    )
+    return
+
+def setup_folders():
+    from pathlib import Path
+
+    folder_names = ["data", 
+                    "models",
+                    'sample_data',
+                    'images'
+                    ]
+
+    for folder in folder_names:
+        _file = Path(f'./{folder}')
+        if _file.exists():
+            pass
+        else:
+            os.mkdir(f'./{folder}')
+    
+    url='https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/sample_data/processed_essays.csv'
+    df = pd.read_csv(url, sep=",", error_bad_lines=False, header=0, index_col=0)
+    # print(df)
+    create_models(df)
+    # set_config()
+    st.session_state['models_loaded'] = True
+    empty_data_folder()
