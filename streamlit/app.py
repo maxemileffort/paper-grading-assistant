@@ -1,12 +1,25 @@
 import streamlit as st
 from PIL import Image
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+import requests
 
 from utils import *
 
 # Config
+image_url = 'https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/images/984102_avatar_casual_male_man_person_icon.ico'
+filename = image_url.split("/")[-1]
+r = requests.get(image_url, stream = True)
+# Check if the image was retrieved successfully
+if r.status_code == 200:
+    # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+    r.raw.decode_content = True
+    
+    # Open a local file with wb ( write binary ) permission.
+    with open("./images/"+filename,'wb') as f:
+        shutil.copyfileobj(r.raw, f)
+
 im = Image.open(".\images\984102_avatar_casual_male_man_person_icon.ico")
 st.set_page_config(
     page_title="I'm Skip, your grading assistant.",
@@ -39,7 +52,8 @@ def setup_folders():
 
     folder_names = ["data", 
                     "models",
-                    'sample_data'
+                    'sample_data',
+                    'images'
                     ]
 
     for folder in folder_names:
@@ -83,7 +97,7 @@ if st.session_state['uploaded_file'] == False:
         uploaded_file = st.file_uploader('Upload student papers here', type=['.zip'], key='uploaded_file_choice', on_change=set_file)
         st.write("") # spacer
         # TODO fix this link to lead somewhere that actually has sample papers
-        st.write("Psst! Not sure about all this? Try it out with some [sample papers](https://www.google.com), or some papers from last year.")
+        st.write("Psst! Not sure about all this? Try it out with some [sample papers](https://github.com/maxemileffort/paper-grading-assistant/raw/master/streamlit/sample_data/grading_assistant_test.zip), or some papers from last year.")
 
 if st.session_state['grading'] == False and st.session_state['uploaded_file'] != False:
     with points_container:
