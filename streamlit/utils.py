@@ -554,26 +554,26 @@ def replicate_csv(data):
     return data
 
 def set_config():
-    image_url = 'https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/images/984102_avatar_casual_male_man_person_icon.ico'
-    filename = image_url.split("/")[-1]
+    # image_url = 'https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/images/984102_avatar_casual_male_man_person_icon.ico'
+    # filename = image_url.split("/")[-1]
 
-    dir_ = '/app/paper-grading-assistant/streamlit/'
+    # dir_ = '/app/paper-grading-assistant/streamlit/'
 
-    r = requests.get(image_url, stream = True)
-    # Check if the image was retrieved successfully
-    if r.status_code == 200:
-        # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
-        r.raw.decode_content = True
+    # r = requests.get(image_url, stream = True)
+    # # Check if the image was retrieved successfully
+    # if r.status_code == 200:
+    #     # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+    #     r.raw.decode_content = True
         
-        # Open a local file with wb ( write binary ) permission.
-        try:
-            with open("./images/"+filename,'wb') as f:
-                shutil.copyfileobj(r.raw, f)
-        except:
-            with open(dir_+"images/"+filename,'wb') as f:
-                shutil.copyfileobj(r.raw, f)
+    #     # Open a local file with wb ( write binary ) permission.
+    #     try:
+    #         with open("./images/"+filename,'wb') as f:
+    #             shutil.copyfileobj(r.raw, f)
+    #     except:
+    #         with open(dir_+"images/"+filename,'wb') as f:
+    #             shutil.copyfileobj(r.raw, f)
 
-    im = Image.open(".\images\984102_avatar_casual_male_man_person_icon.ico")
+    im = Image.open(dir_+"\images\984102_avatar_casual_male_man_person_icon.ico")
     st.set_page_config(
         page_title="I'm Skip, your grading assistant.",
         page_icon=im,
