@@ -423,15 +423,15 @@ def essay2df(essay):
     return df
 
 def extract_papers(filename):
-    base_dir = '/app/paper-grading-assistant/streamlit'
-    try:
-        if st.secrets['prod_env']:
-            dir_name = base_dir + "/data/"
-        else:
-            dir_name = "./data/"
-    except:
-            dir_name = "./data/"
-    # dir_name = "./data"
+    # base_dir = '/app/paper-grading-assistant/streamlit'
+    # try:
+    #     if st.secrets['prod_env']:
+    #         dir_name = base_dir + "/data/"
+    #     else:
+    #         dir_name = "./data/"
+    # except:
+    #         dir_name = "./data/"
+    dir_name = "./data"
     import zipfile
     with zipfile.ZipFile(filename, 'r') as zip_ref:
         zip_ref.extractall(dir_name)
@@ -665,7 +665,6 @@ def setup_folders():
     create_models(df)
     # set_config()
     st.session_state['models_loaded'] = True
-    sys.stdout.write('Finished Folder Setup')
     try:
         empty_data_folder()
     except:

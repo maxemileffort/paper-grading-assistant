@@ -42,8 +42,15 @@ if st.session_state['uploaded_file'] == False and st.session_state['models_loade
         
 if st.session_state['uploaded_file'] == False:
     with header_container:
-        # different levels of text you can include in your app
-        st.title("Hi! I'm Skip, your grading assistant.")
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            try:
+                st.image("/app/paper-grading-assistant/streamlit/images/984102_avatar_casual_male_man_person_icon.ico")
+            except:
+                st.image("./images/984102_avatar_casual_male_man_person_icon.ico")
+
+        with col2:
+            st.title("Hi! I'm Skip, your grading assistant.")
         st.header("Ready to take back your planning period?")
         st.subheader("Just a few quick things...")
         st.write("Your data is totally safe! Everything will be dumped as soon as you close this tab.")
