@@ -1,7 +1,9 @@
-import streamlit as st
+import shutil
+from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
+import streamlit as st
 
 from utils import *
 
@@ -50,10 +52,10 @@ if st.session_state['uploaded_file'] == False:
                 st.image("./images/984102_avatar_casual_male_man_person_icon.png")
 
         with col2:
-            st.write('')
-            st.write('')
-            st.write('')
-            st.write('')
+            st.write('') # spacer
+            st.write('') # spacer
+            st.write('') # spacer
+            st.write('') # spacer
             st.title("Hi! I'm Skip, your grading assistant.")
         st.header("Ready to take back your planning period?")
         st.subheader("Just a few quick things...")
@@ -61,6 +63,18 @@ if st.session_state['uploaded_file'] == False:
 
         st.write("The essays I grade currently need to all be in .docx or .pdf formats.")
         st.write("They will ALSO all need to be in a folder that's zipped.")
+        # with st.expander("Click here for a file zipper >"):
+        #     files_to_zip = st.file_uploader('Choose papers to grade here...', key='zip_file_choice', accept_multiple_files=True, type=['.docx', '.pdf'])
+        #     with ZipFile('sample2.zip', 'w') as zip_obj:
+        #         for file_ in files_to_zip:
+        #             zip_obj.write(file_.name)
+        #     if files_to_zip:
+        #         st.download_button(
+        #             label="Download zipped papers",
+        #             data=zip_obj,
+        #             on_click=reset_state,
+        #             file_name='zipped_papers.zip',
+        #             mime='application/zip')
         st.write("Once that's all done, just drop the zipped file below!")
 
         uploaded_file = st.file_uploader('Upload student papers here', type=['.zip'], key='uploaded_file_choice', on_change=set_file)

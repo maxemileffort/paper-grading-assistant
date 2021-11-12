@@ -404,10 +404,7 @@ def handle_pdf(filename):
 
 def get_file_text(filename):
     full_text = []
-    if filename.endswith('.txt'):
-        # os.remove(filename)
-        return ''
-    elif filename.endswith('.docx'):
+    if filename.endswith('.docx'):
         doc = docx.Document(filename)
         for para in doc.paragraphs:
             full_text.append(para.text)
@@ -431,15 +428,15 @@ def extract_papers(filename):
     #         dir_name = "./data/"
     # except:
     #         dir_name = "./data/"
-    dir_name = "./data"
+    dir_name = "./data/"
     import zipfile
     with zipfile.ZipFile(filename, 'r') as zip_ref:
         zip_ref.extractall(dir_name)
-    # delete zip file
+    # delete zip and txt file
     files = os.listdir(dir_name)
     print("files:", files)
     for item in files:
-        if item.endswith(".zip"):
+        if item.endswith(".zip") or item.endswith(".txt"):
             os.remove(os.path.join(dir_name, item))
     files = os.listdir(dir_name)
     # go into path and create dataframe out of docx and pdf files
