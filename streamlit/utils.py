@@ -1,8 +1,6 @@
 # Adapted from https://github.com/robsalgado/personal_data_science_projects/blob/master/topic_modeling_nmf/nlp_topic_utils.ipynb
 
 import glob, os, re, shutil, string
-from pandas.core.indexing import convert_from_missing_indexer_tuple
-import requests
 from joblib import dump, load
 from PIL import Image
 from sklearn import preprocessing
@@ -18,6 +16,11 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import docx
+import fitz  
+
+import pytesseract
+from pytesseract import Output, TesseractError
+
 
 # Contraction map
 c_dict = {
@@ -268,6 +271,8 @@ def generate_para_topics(df):
     from sklearn.decomposition import LatentDirichletAllocation
 
     # use or build w2v model
+    df = df[df['token_p'].map(len) > 5]
+    print(df)
     tokenized_text = df['token_p']
     # LDA can only use raw term counts for LDA because it is a probabilistic graphical model
     no_features = 1000
@@ -276,7 +281,10 @@ def generate_para_topics(df):
                                     max_features=no_features, 
                                     #stop_words='english', 
                                     preprocessor=' '.join)
-    tf = tf_vectorizer.fit_transform(tokenized_text) # tf embeddings
+    try:
+        tf = tf_vectorizer.fit_transform(tokenized_text) # tf embeddings
+    except:
+        return 'Problem with file.'
     # print("tf: \n", tf)
     tf_feature_names = tf_vectorizer.get_feature_names()
 
@@ -347,7 +355,10 @@ def empty_data_folder():
     dir_name = "./data"
     files = os.listdir(dir_name)
     for item in files:
-        shutil.rmtree(os.path.join(dir_name, item))
+        try:
+            shutil.rmtree(os.path.join(dir_name, item))
+        except:
+            os.remove(dir_name+'/'+item)
     return
 
 def save_uploaded_file(uploadedfile):
@@ -357,11 +368,37 @@ def save_uploaded_file(uploadedfile):
     st.success("Successfully uploaded papers")
     return filename
 
-def get_text(filename):
-    doc = docx.Document(filename)
+def handle_pdf(filename):
+    with fitz.open(filename) as doc:
+        full_text = ""
+        zoom = 1.1
+        mat = fitz.Matrix(zoom, zoom)
+        noOfPages = doc.pageCount 
+
+        for pageNo in range(noOfPages):
+            page = doc.load_page(pageNo) # number of pages
+            pix = page.get_pixmap(matrix = mat) # if you need to scale a scanned image
+            output = './data/' + str(pageNo) + '.jpg'
+            pix.save(output) # skip this if you don't need to render a page
+
+            text = str(pytesseract.image_to_string(Image.open(output)))
+            full_text += text
+            os.remove(output)
+        return full_text
+
+def get_file_text(filename):
     fullText = []
-    for para in doc.paragraphs:
-        fullText.append(para.text)
+    if filename.endswith('.txt'):
+        # os.remove(filename)
+        return ''
+    elif filename.endswith('.docx'):
+        doc = docx.Document(filename)
+        for para in doc.paragraphs:
+            fullText.append(para.text)
+    elif filename.endswith('.pdf'):
+        text = handle_pdf(filename)
+        print("pdf_text:", text)
+        return text
     return '\n'.join(fullText)
 
 def essay2df(essay):
@@ -379,14 +416,23 @@ def extract_papers(filename):
     for item in files:
         if item.endswith(".zip"):
             os.remove(os.path.join(dir_name, item))
-    # go into path and create dataframe out of docx files
-    path_ = os.path.join(dir_name, os.listdir(dir_name)[0])
+    # go into path and create dataframe out of docx and pdf files
+    if len(files) == 1:
+        # sometimes the files are nested one more folder deep:
+        path_ = os.path.join(dir_name, os.listdir(dir_name)[0])
+    else: 
+        # if the files extract properly:
+        path_ = dir_name
     files = os.listdir(path_)
     doc_lst = []
     for item in files:
-        document = get_text(path_+'/'+item)
+        try:
+            document = get_file_text(path_+'/'+item)
+        except:
+            document = get_file_text(path_)
         doc_lst.append([item, document])
     df = pd.DataFrame(doc_lst, columns=['file', 'essay'])
+    print(df)
     return df
 
 def swap_grade(grade):
@@ -404,12 +450,14 @@ def swap_grade(grade):
 
 def fix_org_score(score):
     comment = ''
-    if score >= 0.7:
-        comment = "Probably just needs some small tweaks."
-    elif score >= 0.4 and score < 0.7:
-        comment = "Organization is clear but needs work."
-    else:
+    if score >= 0.5:
+        comment = "Great paper with just some small tweaks."
+    elif score >= 0.25 and score < 0.5:
+        comment = "Clear organizational structure, but could use some work."
+    elif score < 0.25 and score >= 0:
         comment = "Organization makes the paper difficult to read."
+    else:
+        comment = "Something went wrong here. Maybe this isn't a paper, or it was submitted in an unsupported format."
     return comment
 
 def grade_papers(uploadedfile, max_score, new_model=False): 
@@ -442,6 +490,9 @@ def grade_papers(uploadedfile, max_score, new_model=False):
         p['token_p'] = p.paragraphs.apply(process_text)
         p['token_count'] = p.token_p.apply(len)
         p_topics = generate_para_topics(p)
+        if isinstance(p_topics, str):
+            lst_coefs.append(-100)
+            continue
         high_num_same_top = p_topics['top_label'].value_counts()[0]
         p_topics_len = len(p_topics)
         freq = high_num_same_top / p_topics_len
@@ -554,26 +605,12 @@ def replicate_csv(data):
     return data
 
 def set_config():
-    # image_url = 'https://raw.githubusercontent.com/maxemileffort/paper-grading-assistant/master/streamlit/images/984102_avatar_casual_male_man_person_icon.ico'
-    # filename = image_url.split("/")[-1]
 
     base_dir = '/app/paper-grading-assistant/streamlit/'
-
-    # r = requests.get(image_url, stream = True)
-    # # Check if the image was retrieved successfully
-    # if r.status_code == 200:
-    #     # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
-    #     r.raw.decode_content = True
-        
-    #     # Open a local file with wb ( write binary ) permission.
-    #     try:
-    #         with open("./images/"+filename,'wb') as f:
-    #             shutil.copyfileobj(r.raw, f)
-    #     except:
-    #         with open(dir_+"images/"+filename,'wb') as f:
-    #             shutil.copyfileobj(r.raw, f)
-
-    im = Image.open(base_dir+"/images/984102_avatar_casual_male_man_person_icon.ico")
+    try:
+        im = Image.open(base_dir+"/images/984102_avatar_casual_male_man_person_icon.ico")
+    except:
+        im = Image.open("./images/984102_avatar_casual_male_man_person_icon.ico")
     st.set_page_config(
         page_title="I'm Skip, your grading assistant.",
         page_icon=im,
