@@ -352,15 +352,15 @@ def generate_para_topics(df):
     return df_topics
 
 def empty_data_folder():
-    # base_dir = '/app/paper-grading-assistant/streamlit'
-    # try:
-    #     if st.secrets['prod_env']:
-    #         dir_name = base_dir + "/data"
-    #     else:
-    #         dir_name = "./data"
-    # except:
-    #         dir_name = "./data"
-    dir_name = "./data"
+    base_dir = '/app/paper-grading-assistant/streamlit'
+    try:
+        if st.secrets['prod_env']:
+            dir_name = base_dir + "/data/"
+        else:
+            dir_name = "./data/"
+    except:
+            dir_name = "./data/"
+    # dir_name = "./data"
     files = os.listdir(dir_name)
     for item in files:
         try:
@@ -370,15 +370,15 @@ def empty_data_folder():
     return
 
 def save_uploaded_file(uploadedfile):
-    # base_dir = '/app/paper-grading-assistant/streamlit'
-    # try:
-    #     if st.secrets['prod_env']:
-    #         dir_name = base_dir + "/data"
-    #     else:
-    #         dir_name = "./data"
-    # except:
-    #         dir_name = "./data"
-    dir_name = "./data"
+    base_dir = '/app/paper-grading-assistant/streamlit'
+    try:
+        if st.secrets['prod_env']:
+            dir_name = base_dir + "/data/"
+        else:
+            dir_name = "./data/"
+    except:
+            dir_name = "./data/"
+    # dir_name = "./data"
     filename = os.path.join(dir_name,uploadedfile.name)
     with open(filename,"wb") as f:
         f.write(uploadedfile.getbuffer())
@@ -423,15 +423,15 @@ def essay2df(essay):
     return df
 
 def extract_papers(filename):
-    # base_dir = '/app/paper-grading-assistant/streamlit'
-    # try:
-    #     if st.secrets['prod_env']:
-    #         dir_name = base_dir + "/data"
-    #     else:
-    #         dir_name = "./data"
-    # except:
-    #         dir_name = "./data"
-    dir_name = "./data"
+    base_dir = '/app/paper-grading-assistant/streamlit'
+    try:
+        if st.secrets['prod_env']:
+            dir_name = base_dir + "/data/"
+        else:
+            dir_name = "./data/"
+    except:
+            dir_name = "./data/"
+    # dir_name = "./data"
     import zipfile
     with zipfile.ZipFile(filename, 'r') as zip_ref:
         zip_ref.extractall(dir_name)
@@ -632,12 +632,11 @@ def replicate_csv(data):
     return data
 
 def set_config():
-    # base_dir = '/app/paper-grading-assistant/streamlit'
-    # try:
-    #     im = Image.open(base_dir+"/images/984102_avatar_casual_male_man_person_icon.ico")
-    # except:
-    #     im = Image.open("./images/984102_avatar_casual_male_man_person_icon.ico")
-    im = Image.open("./images/984102_avatar_casual_male_man_person_icon.ico")
+    base_dir = '/app/paper-grading-assistant/streamlit'
+    try:
+        im = Image.open(base_dir+"/images/984102_avatar_casual_male_man_person_icon.ico")
+    except:
+        im = Image.open("./images/984102_avatar_casual_male_man_person_icon.ico")
     st.set_page_config(
         page_title="I'm Skip, your grading assistant.",
         page_icon=im,
