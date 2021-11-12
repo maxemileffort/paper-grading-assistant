@@ -76,13 +76,13 @@ if st.session_state['grading'] == True:
         st.markdown("## How to use this spreadsheet:")
         st.markdown("### The next table will have some data that you can use to speed up your grading process. Chaching!")
         st.markdown("If it looks a little small, hover over the table and a little icon appears on the top right side. Click it, and it will make the table bigger.")
-        st.markdown("Here's a key for the columns on the table:")
-        st.markdown("* **File:** The name of the file graded. Helpful if students put their own names in the actual file name.")
-        st.markdown("* **Essay:** The submitted essay.")
-        st.markdown("* **Word Count:** Approximate number of words in the essay, not including one-letter words.")
-        st.markdown("* **Page Count:** Approximate number of pages in this paper. This column is based on the idea that pages are about 250 words when double-spaced.")
-        st.markdown("* **Letter Grade:** The letter grade recommended for the paper.")
-        st.markdown("* **Organization Score:** Possible feedback for the student, based on how well the paragraphs are organized.")
+        with st.expander("Here's a key for the columns on the table:"):
+            st.markdown("* **File:** The name of the file graded. Helpful if students put their own names in the actual file name.")
+            st.markdown("* **Essay:** The submitted essay.")
+            st.markdown("* **Word Count:** Approximate number of words in the essay, not including one-letter words.")
+            st.markdown("* **Page Count:** Approximate number of pages in this paper. This column is based on the idea that pages are about 250 words when double-spaced.")
+            st.markdown("* **Letter Grade:** The letter grade recommended for the paper.")
+            st.markdown("* **Organization Score:** Possible feedback for the student, based on how well the paragraphs are organized.")
         st.dataframe(extracted_papers)
 
         @st.cache

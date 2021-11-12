@@ -407,11 +407,18 @@ def essay2df(essay):
     return df
 
 def extract_papers(filename):
+    base_dir = '/app/paper-grading-assistant/streamlit'
     import zipfile
     with zipfile.ZipFile(filename, 'r') as zip_ref:
         zip_ref.extractall('./data')
     # delete zip file
-    dir_name = "./data"
+    try:
+        if st.secrets['prod_env']:
+            dir_name = base_dir + "/data"
+        else:
+            dir_name = "./data"
+    except:
+            dir_name = "./data"
     files = os.listdir(dir_name)
     print("files:", files)
     for item in files:
