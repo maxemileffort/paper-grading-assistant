@@ -369,7 +369,15 @@ def empty_data_folder():
     return
 
 def save_uploaded_file(uploadedfile):
-    filename = os.path.join("./data",uploadedfile.name)
+    base_dir = '/app/paper-grading-assistant/streamlit'
+    try:
+        if st.secrets['prod_env']:
+            dir_name = base_dir + "/data"
+        else:
+            dir_name = "./data"
+    except:
+            dir_name = "./data"
+    filename = os.path.join(dir_name,uploadedfile.name)
     with open(filename,"wb") as f:
         f.write(uploadedfile.getbuffer())
     st.success("Successfully uploaded papers")
@@ -381,12 +389,11 @@ def handle_pdf(filename):
         zoom = 1.1
         mat = fitz.Matrix(zoom, zoom)
         noOfPages = doc.pageCount 
-
         for pageNo in range(noOfPages):
-            page = doc.load_page(pageNo) # number of pages
-            pix = page.get_pixmap(matrix = mat) # if you need to scale a scanned image
+            page = doc.load_page(pageNo) 
+            pix = page.get_pixmap(matrix = mat) 
             output = './data/' + str(pageNo) + '.jpg'
-            pix.save(output) # skip this if you don't need to render a page
+            pix.save(output) 
 
             text = str(pytesseract.image_to_string(Image.open(output)))
             full_text += text
@@ -394,19 +401,19 @@ def handle_pdf(filename):
         return full_text
 
 def get_file_text(filename):
-    fullText = []
+    full_text = []
     if filename.endswith('.txt'):
         # os.remove(filename)
         return ''
     elif filename.endswith('.docx'):
         doc = docx.Document(filename)
         for para in doc.paragraphs:
-            fullText.append(para.text)
+            full_text.append(para.text)
     elif filename.endswith('.pdf'):
         text = handle_pdf(filename)
         # print("pdf_text:", text)
         return text
-    return '\n'.join(fullText)
+    return '\n'.join(full_text)
 
 def essay2df(essay):
     paragraphs = essay.split('\n')
@@ -623,7 +630,7 @@ def replicate_csv(data):
 
 def set_config():
 
-    base_dir = '/app/paper-grading-assistant/streamlit/'
+    base_dir = '/app/paper-grading-assistant/streamlit'
     try:
         im = Image.open(base_dir+"/images/984102_avatar_casual_male_man_person_icon.ico")
     except:
@@ -656,4 +663,7 @@ def setup_folders():
     create_models(df)
     # set_config()
     st.session_state['models_loaded'] = True
-    empty_data_folder()
+    try:
+        empty_data_folder()
+    except:
+        pass
