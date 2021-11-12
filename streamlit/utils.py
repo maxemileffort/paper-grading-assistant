@@ -388,7 +388,7 @@ def save_uploaded_file(uploadedfile):
 def handle_pdf(filename):
     with fitz.open(filename) as doc:
         full_text = ""
-        zoom = 1.1
+        zoom = 1.2
         mat = fitz.Matrix(zoom, zoom)
         noOfPages = doc.pageCount 
         for pageNo in range(noOfPages):
