@@ -1,6 +1,6 @@
 # Adapted from https://github.com/robsalgado/personal_data_science_projects/blob/master/topic_modeling_nmf/nlp_topic_utils.ipynb
 
-import glob, os, re, shutil, string
+import glob, os, re, shutil, string, sys
 from joblib import dump, load
 from PIL import Image
 from sklearn import preprocessing
@@ -629,7 +629,6 @@ def replicate_csv(data):
     return data
 
 def set_config():
-
     base_dir = '/app/paper-grading-assistant/streamlit'
     try:
         im = Image.open(base_dir+"/images/984102_avatar_casual_male_man_person_icon.ico")
@@ -663,6 +662,7 @@ def setup_folders():
     create_models(df)
     # set_config()
     st.session_state['models_loaded'] = True
+    sys.stdout.write('Finished Folder Setup')
     try:
         empty_data_folder()
     except:
