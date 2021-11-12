@@ -413,9 +413,11 @@ def extract_papers(filename):
     # delete zip file
     dir_name = "./data"
     files = os.listdir(dir_name)
+    print("files:", files)
     for item in files:
         if item.endswith(".zip"):
             os.remove(os.path.join(dir_name, item))
+    files = os.listdir(dir_name)
     # go into path and create dataframe out of docx and pdf files
     if len(files) == 1:
         # sometimes the files are nested one more folder deep:
@@ -423,6 +425,7 @@ def extract_papers(filename):
     else: 
         # if the files extract properly:
         path_ = dir_name
+    print(path_)
     files = os.listdir(path_)
     doc_lst = []
     for item in files:
