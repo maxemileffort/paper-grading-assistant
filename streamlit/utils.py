@@ -352,7 +352,14 @@ def generate_para_topics(df):
     return df_topics
 
 def empty_data_folder():
-    dir_name = "./data"
+    base_dir = '/app/paper-grading-assistant/streamlit'
+    try:
+        if st.secrets['prod_env']:
+            dir_name = base_dir + "/data"
+        else:
+            dir_name = "./data"
+    except:
+            dir_name = "./data"
     files = os.listdir(dir_name)
     for item in files:
         try:
