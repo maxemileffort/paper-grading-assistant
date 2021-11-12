@@ -48,7 +48,7 @@ if st.session_state['uploaded_file'] == False:
         st.subheader("Just a few quick things...")
         st.write("Your data is totally safe! Everything will be dumped as soon as you close this tab.")
 
-        st.write("The essays I grade currently need to all be in .docx formats.")
+        st.write("The essays I grade currently need to all be in .docx or .pdf formats.")
         st.write("They will ALSO all need to be in a folder that's zipped.")
         st.write("Once that's all done, just drop the zipped file below!")
 
