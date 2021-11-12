@@ -272,7 +272,7 @@ def generate_para_topics(df):
 
     # use or build w2v model
     df = df[df['token_p'].map(len) > 5]
-    print(df)
+    # print(df)
     tokenized_text = df['token_p']
     # LDA can only use raw term counts for LDA because it is a probabilistic graphical model
     no_features = 1000
@@ -397,7 +397,7 @@ def get_file_text(filename):
             fullText.append(para.text)
     elif filename.endswith('.pdf'):
         text = handle_pdf(filename)
-        print("pdf_text:", text)
+        # print("pdf_text:", text)
         return text
     return '\n'.join(fullText)
 
@@ -408,10 +408,6 @@ def essay2df(essay):
 
 def extract_papers(filename):
     base_dir = '/app/paper-grading-assistant/streamlit'
-    import zipfile
-    with zipfile.ZipFile(filename, 'r') as zip_ref:
-        zip_ref.extractall('./data')
-    # delete zip file
     try:
         if st.secrets['prod_env']:
             dir_name = base_dir + "/data"
@@ -419,6 +415,10 @@ def extract_papers(filename):
             dir_name = "./data"
     except:
             dir_name = "./data"
+    import zipfile
+    with zipfile.ZipFile(filename, 'r') as zip_ref:
+        zip_ref.extractall(dir_name)
+    # delete zip file
     files = os.listdir(dir_name)
     print("files:", files)
     for item in files:
