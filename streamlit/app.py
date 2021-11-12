@@ -1,4 +1,4 @@
-import shutil
+import shutil, time
 from zipfile import ZipFile
 
 import numpy as np
@@ -63,6 +63,7 @@ if st.session_state['uploaded_file'] == False:
 
         st.write("The essays I grade currently need to all be in .docx or .pdf formats.")
         st.write("They will ALSO all need to be in a folder that's zipped.")
+        # TODO Create a folder zipper for people to just add files to
         # with st.expander("Click here for a file zipper >"):
         #     files_to_zip = st.file_uploader('Choose papers to grade here...', key='zip_file_choice', accept_multiple_files=True, type=['.docx', '.pdf'])
         #     with ZipFile('sample2.zip', 'w') as zip_obj:
@@ -96,7 +97,13 @@ if st.session_state['grading'] == True:
         uf = st.session_state['uploaded_file']
         pp = int(st.session_state['pts_possible'])
         st.write("") # spacer
+        st.success("Successfully uploaded papers")
         st.subheader("Grading these papers...")
+        # TODO relate this back to how long it actually takes to grade
+        progress = st.progress(0)
+        for i in range(100):
+            time.sleep(0.1)
+            progress.progress(i+1)
         extracted_papers = grade_papers(uf, pp)
         st.markdown("## How to use this spreadsheet:")
         st.markdown("### The next table will have some data that you can use to speed up your grading process. Chaching!")

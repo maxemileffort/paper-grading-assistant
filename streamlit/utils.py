@@ -370,19 +370,10 @@ def empty_data_folder():
     return
 
 def save_uploaded_file(uploadedfile):
-    # base_dir = '/app/paper-grading-assistant/streamlit'
-    # try:
-    #     if st.secrets['prod_env']:
-    #         dir_name = base_dir + "/data/"
-    #     else:
-    #         dir_name = "./data/"
-    # except:
-    #         dir_name = "./data/"
     dir_name = "./data"
     filename = os.path.join(dir_name,uploadedfile.name)
     with open(filename,"wb") as f:
         f.write(uploadedfile.getbuffer())
-    st.success("Successfully uploaded papers")
     return filename
 
 def handle_pdf(filename):
