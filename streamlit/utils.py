@@ -450,10 +450,11 @@ def extract_papers(filename):
     files = os.listdir(path_)
     doc_lst = []
     for item in files:
-        try:
-            document = get_file_text(path_+'/'+item)
-        except:
-            document = get_file_text(path_)
+        # try:
+        #     document = get_file_text(path_+'/'+item)
+        # except:
+        #     document = get_file_text(path_)
+        document = get_file_text(path_+'/'+item)
         doc_lst.append([item, document])
     df = pd.DataFrame(doc_lst, columns=['file', 'essay'])
     print(df)
