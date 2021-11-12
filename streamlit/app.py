@@ -42,14 +42,18 @@ if st.session_state['uploaded_file'] == False and st.session_state['models_loade
         
 if st.session_state['uploaded_file'] == False:
     with header_container:
-        col1, col2 = st.columns([3, 1])
+        col1, col2 = st.columns([2, 3])
         with col1:
             try:
-                st.image("/app/paper-grading-assistant/streamlit/images/984102_avatar_casual_male_man_person_icon.ico")
+                st.image("/app/paper-grading-assistant/streamlit/images/984102_avatar_casual_male_man_person_icon.png")
             except:
-                st.image("./images/984102_avatar_casual_male_man_person_icon.ico")
+                st.image("./images/984102_avatar_casual_male_man_person_icon.png")
 
         with col2:
+            st.write('')
+            st.write('')
+            st.write('')
+            st.write('')
             st.title("Hi! I'm Skip, your grading assistant.")
         st.header("Ready to take back your planning period?")
         st.subheader("Just a few quick things...")
@@ -83,7 +87,7 @@ if st.session_state['grading'] == True:
         st.markdown("## How to use this spreadsheet:")
         st.markdown("### The next table will have some data that you can use to speed up your grading process. Chaching!")
         st.markdown("If it looks a little small, hover over the table and a little icon appears on the top right side. Click it, and it will make the table bigger.")
-        with st.expander("Here's a key for the columns on the table:"):
+        with st.expander("Click here for a legend to the columns on the table >"):
             st.markdown("* **File:** The name of the file graded. Helpful if students put their own names in the actual file name.")
             st.markdown("* **Essay:** The submitted essay.")
             st.markdown("* **Word Count:** Approximate number of words in the essay, not including one-letter words.")
