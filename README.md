@@ -17,21 +17,22 @@ Placeholder
 
 ## 3. EDA
 
-Data was explored more and more as the project went on, so EDA is in a lot of different places. The following are some of the interesting snippets pulled from the ongoing analysis, as well as where that can be found.
+![eda_conclusion](./readme_files/eda_conclusion2.jpg)
 
-Coming soon...
-
-<!-- ![eda_conclusion](./readme_files/eda_conclusion.jpg) -->
+* **Word and Token Counts** seem to be the most correlated, as mentioned in the figure. And that makes a lot of sense.
+* **Essay Sets** correlating very little was interesting because the different sets were different grade levels (i.e. students at different ages). The grades given were independent of student age (class vs essay set).
 
 ## 4. Method
 
-The dataset has different scales for each essay set, which were all standardized as a score out of 100. These were then all given a "Letter Grade" (A, B, C, D, or F), which is the class that we are trying to predict.
+The dataset has different scales for each essay set, which were all standardized as a score out of 100. These were then all given a "Letter Grade" (A, B, C, D, or F), which is the class that we are trying to predict. 
 
 Additionally, Topic Modeling was used to examine the similarities between paragraphs. That was used to help a teacher leave feedback about how well a student organizes his thoughts.
 
 More on these explained in the next section.
 
-The idea here, is to sort a classroom worth of papers into piles quickly, so that teachers will know who needs more attention vs the ones that just need quick input. English teachers generally still want to read the papers, and this doesn't take away from that. Instead it helps teachers focus on the enjoyable parts, and makes the grading process more efficient and effective.
+I initially had thought about this problem as a regression problem, and I wanted to predict the actual scores. After a few consults with my teacher wife, she suggested that, at least for her style of grading, it made more sense to quickly sort the papers into piles of A, B, C and so on. That way, she could spend more time commenting on papers that required extra time and less time figuring out which of those papers actually needed that kind of commentary. 
+
+So that's the idea here: sort a classroom worth of papers into piles quickly, so that teachers will know who needs more attention vs the ones that just need quick input. English teachers generally still want to read the papers, and this doesn't take away from that. Instead it helps teachers focus on the enjoyable parts, and makes the grading process more efficient and effective.
 
 ## 5. Algorithms & Machine Learning
 
