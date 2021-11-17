@@ -4,3 +4,4 @@ __pycache__
 *.joblib
 *.kvmodel*
 scratch.py
+papers2grade.zip
