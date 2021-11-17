@@ -1,9 +1,9 @@
 ![cover_photo](./readme_files/cover_photo.jpg)
 # Paper Grading Assistant
 
-*Grading is the one of the top problems facing teachers in the US (Source: my teacher wife.) While it varies from subject to subject, many teachers spend upwards of several hours checking on the work of their students, to make sure they are growing and becoming prepared for their years ahead.*
+*Grading is the one of the top problems facing teachers in the US (Source: my teacher wife.) While it varies from subject to subject, many teachers spend upwards of several hours checking on the work of their students, in order to ensure growth and preparedness for their years ahead.*
 
-*Because they are often times over-worked and under-paid, the goal of this project is to help teachers reclaim some of that time and money by making the paper grading process more efficient. The result of doing that leads to more meaningful feedback for the students and more productive use of time for the teachers.*
+*Because teachers are often over-worked and under-paid, the goal of this project is to help teachers reclaim some of that time and money by making the paper grading process more efficient. The result of doing that leads to more meaningful feedback for the students and more productive use of time for the teachers.*
 
 ## 1. Data
 
@@ -11,9 +11,11 @@ For this, there are 2 sources of data. The first: [Hewlett Foundation Kaggle Com
 
 The other set of data is from my teacher wife, who provided some student papers in order to test the idea in more of a production-esque setting.
 
-## 2. Data Cleaning
+## 2. Data Cleaning & Processing
 
-Placeholder
+### Training Data
+
+### Test and Production Data
 
 ## 3. EDA
 
@@ -26,7 +28,7 @@ Placeholder
 
 The dataset has different scales for each essay set, which were all standardized as a score out of 100. These were then all given a "Letter Grade" (A, B, C, D, or F), which is the class that we are trying to predict. 
 
-Additionally, Topic Modeling was used to examine the similarities between paragraphs. That was used to help a teacher leave feedback about how well a student organizes his thoughts.
+Additionally, Topic Modeling was used to examine the similarities between paragraphs. The idea there is to help a teacher leave feedback about how well a student organizes his or her thoughts.
 
 More on these explained in the next section.
 

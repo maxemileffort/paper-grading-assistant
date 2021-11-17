@@ -654,3 +654,9 @@ def setup_folders():
         empty_data_folder()
     except:
         pass
+
+def make_archive(name, source, destination):
+        frmt = 'zip'
+        archive_from = os.path.dirname(source)
+        archive_to = os.path.basename(destination.strip(os.sep))
+        shutil.make_archive(name, frmt, archive_from, archive_to)

@@ -11,7 +11,12 @@ from utils import *
 set_config()
 
 # State
-states = ['grading', 'uploaded_file', 'pts_possible', 'models_loaded']
+states = ['grading', 
+          'uploaded_file', 
+          'pts_possible', 
+          'models_loaded', 
+          'zipped_files',
+          ]
 for state in states:
     if state not in st.session_state:
         st.session_state[state] = False
@@ -30,6 +35,9 @@ def set_pts_possible():
 
 def set_file():
     st.session_state['uploaded_file'] = st.session_state.uploaded_file_choice
+
+def help_zip():
+    st.session_state['zipped_files'] = st.session_state.zip_file_choice
 
 # Containers
 header_container = st.container()
@@ -63,19 +71,21 @@ if st.session_state['uploaded_file'] == False:
 
         st.write("The essays I grade currently need to all be in .docx or .pdf formats.")
         st.write("They will ALSO all need to be in a folder that's zipped.")
-        # TODO Create a folder zipper for people to just add files to
-        # with st.expander("Click here for a file zipper >"):
-        #     files_to_zip = st.file_uploader('Choose papers to grade here...', key='zip_file_choice', accept_multiple_files=True, type=['.docx', '.pdf'])
-        #     with ZipFile('sample2.zip', 'w') as zip_obj:
-        #         for file_ in files_to_zip:
-        #             zip_obj.write(file_.name)
-        #     if files_to_zip:
-        #         st.download_button(
-        #             label="Download zipped papers",
-        #             data=zip_obj,
-        #             on_click=reset_state,
-        #             file_name='zipped_papers.zip',
-        #             mime='application/zip')
+        with st.expander("Click here for a file zipper >"):
+            st.file_uploader('Choose papers to grade here...', key='zip_file_choice', accept_multiple_files=True, type=['.docx', '.pdf'], on_change=help_zip)
+            if st.session_state.zip_file_choice:
+                for file_ in st.session_state.zip_file_choice:
+                    save_uploaded_file(file_)
+                make_archive('papers2grade', './data/', '.')
+                for file_ in st.session_state.zip_file_choice:
+                    os.remove('./data/'+file_.name)
+                # TODO Access file programmatically and pass to dl button
+                with open('papers2grade.zip', 'rb') as dl_file:
+                    st.download_button(
+                        label="Download zipped papers",
+                        data=dl_file,
+                        file_name='zipped_papers.zip',
+                        mime='application/zip')
         st.write("Once that's all done, just drop the zipped file below!")
 
         uploaded_file = st.file_uploader('Upload student papers here', type=['.zip'], key='uploaded_file_choice', on_change=set_file)
@@ -101,7 +111,7 @@ if st.session_state['grading'] == True:
         st.subheader("Grading these papers...")
         # TODO relate this back to how long it actually takes to grade
         progress = st.progress(0)
-        for i in range(100):
+        for i in range(10):
             time.sleep(0.1)
             progress.progress(i+1)
         extracted_papers = grade_papers(uf, pp)
