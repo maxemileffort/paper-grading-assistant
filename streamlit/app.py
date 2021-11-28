@@ -16,6 +16,7 @@ states = ['grading',
           'pts_possible', 
           'models_loaded', 
           'zipped_files',
+          'grading_progress'
           ]
 for state in states:
     if state not in st.session_state:
@@ -25,6 +26,10 @@ for state in states:
 def reset_state():
     for state in states:
         st.session_state[state] = False
+        try:
+            os.remove('./papers2grade.zip')
+        except:
+            pass
 
 def start_grading():
     st.session_state['grading'] = True
@@ -79,7 +84,6 @@ if st.session_state['uploaded_file'] == False:
                 make_archive('papers2grade', './data/', '.')
                 for file_ in st.session_state.zip_file_choice:
                     os.remove('./data/'+file_.name)
-                # TODO Access file programmatically and pass to dl button
                 with open('papers2grade.zip', 'rb') as dl_file:
                     st.download_button(
                         label="Download zipped papers",
@@ -90,7 +94,6 @@ if st.session_state['uploaded_file'] == False:
 
         uploaded_file = st.file_uploader('Upload student papers here', type=['.zip'], key='uploaded_file_choice', on_change=set_file)
         st.write("") # spacer
-        # TODO fix this link to lead somewhere that actually has sample papers
         st.write("Psst! Not sure about all this? Try it out with some [sample papers](https://github.com/maxemileffort/paper-grading-assistant/raw/master/streamlit/sample_data/grading_assistant_test.zip), or some papers from last year.")
 
 if st.session_state['grading'] == False and st.session_state['uploaded_file'] != False:
@@ -108,13 +111,8 @@ if st.session_state['grading'] == True:
         pp = int(st.session_state['pts_possible'])
         st.write("") # spacer
         st.success("Successfully uploaded papers")
-        st.subheader("Grading these papers...")
-        # TODO relate this back to how long it actually takes to grade
-        progress = st.progress(0)
-        for i in range(10):
-            time.sleep(0.1)
-            progress.progress(i+1)
-        extracted_papers = grade_papers(uf, pp)
+        with st.spinner("Sorting papers to give to the robots..."):
+            extracted_papers = grade_papers(uf, pp)
         st.markdown("## How to use this spreadsheet:")
         st.markdown("### The next table will have some data that you can use to speed up your grading process. Chaching!")
         st.markdown("If it looks a little small, hover over the table and a little icon appears on the top right side. Click it, and it will make the table bigger.")

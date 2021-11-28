@@ -425,7 +425,7 @@ def extract_papers(filename):
         zip_ref.extractall(dir_name)
     # delete zip and txt file
     files = os.listdir(dir_name)
-    print("files:", files)
+    # print("files:", files)
     for item in files:
         if item.endswith(".zip") or item.endswith(".txt"):
             os.remove(os.path.join(dir_name, item))
@@ -437,14 +437,14 @@ def extract_papers(filename):
     else: 
         # if the files extract properly:
         path_ = dir_name
-    print(path_)
+    # print(path_)
     files = os.listdir(path_)
     doc_lst = []
     for item in files:
         document = get_file_text(path_+'/'+item)
         doc_lst.append([item, document])
     df = pd.DataFrame(doc_lst, columns=['file', 'essay'])
-    print(df)
+    # print(df)
     return df
 
 def swap_grade(grade):
@@ -472,7 +472,8 @@ def fix_org_score(score):
         comment = "Something went wrong here. Maybe this isn't a paper, or it was submitted in an unsupported format."
     return comment
 
-def grade_papers(uploadedfile, max_score, new_model=False): 
+def grade_papers(uploadedfile, max_score, new_model=False):
+    st.session_state['grading_progress']  = 0
     # first, empty data folder
     empty_data_folder()
     # save file 
@@ -484,7 +485,7 @@ def grade_papers(uploadedfile, max_score, new_model=False):
     df = process_df(df, max_score)
     # train models
     if new_model:
-        # TODO replace this with the teacher's model
+        # TODO Implement this
         clf, tf_vec = train_teachers_models()
     else:
         clf, tf_vec = get_pretrained_models()
@@ -495,7 +496,20 @@ def grade_papers(uploadedfile, max_score, new_model=False):
     df['org_score'] = 0
     # run through topic modeling model
     lst_coefs=[]
+    msg = False
     for i in range(len(df)):
+        # TODO add some functionality that manages state 
+        # and tells the progress bar to 'progress'. It'll 
+        # probably happen in this block.
+        pct_complete = i / len(df) * 100
+        pct_complete = round(pct_complete)
+        print(pct_complete)
+        st.session_state['grading_progress'] = pct_complete
+        if msg:
+            msg.empty()
+            msg = st.info(f"On paper {i+1} out of {len(df)} papers")
+        else:
+            msg = st.info(f"On paper {i+1} out of {len(df)} papers")
         p = essay2df(df.essay.iloc[i])
         p['para_id'] = range(1,len(p)+1)
         p['word_count'] = p.paragraphs.apply(word_count)
