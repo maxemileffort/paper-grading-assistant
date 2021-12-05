@@ -209,14 +209,15 @@ def word_count(text):
     return len(str(text).split(' '))
 
 def process_df(data, max_score):
-    """ Turns essays into a DF that can be used to train a classificatio model. """
+    """ Turns essays into a DF that can be used to train a classification model. """
     data['word_count'] = data.essay.apply(word_count)
     data['page_count'] = data.word_count.apply(lambda x: str(round(x/250, 1)).rstrip('0'))
     data['tokenized_essay'] = data.essay.apply(process_text)
     data['token_count'] = data.tokenized_essay.apply(len)
     data = data.fillna(0)
     data['max_score'] = max_score
-    data['letter_grade'] = 0
+    data['base_grade'] = 0
+    
     return data
 
 def create_models(df):
@@ -461,16 +462,17 @@ def swap_grade(grade):
     return grade
 
 def fix_org_score(score):
-    comment = ''
-    if score >= 0.5:
-        comment = "Great paper with just some small tweaks."
-    elif score >= 0.25 and score < 0.5:
-        comment = "Clear organizational structure, but could use some work."
-    elif score < 0.25 and score >= 0:
-        comment = "Organization makes the paper difficult to read."
-    else:
-        comment = "Something went wrong here. Maybe this isn't a paper, or it was submitted in an unsupported format."
-    return comment
+    # comment = ''
+    # if score >= 0.5:
+    #     comment = "Great paper with just some small tweaks."
+    # elif score >= 0.25 and score < 0.5:
+    #     comment = "Clear organizational structure, but could use some work."
+    # elif score < 0.25 and score >= 0:
+    #     comment = "Organization makes the paper difficult to read."
+    # else:
+    #     comment = "Something went wrong here. Maybe this isn't a paper, or it was submitted in an unsupported format."
+    # return comment
+    return round(score * 10)
 
 def grade_papers(uploadedfile, max_score, new_model=False):
     st.session_state['grading_progress']  = 0
@@ -492,24 +494,19 @@ def grade_papers(uploadedfile, max_score, new_model=False):
     # predict grades
     tf = tf_vec.transform(df.tokenized_essay.apply(" ".join))
     y_pred = clf.predict(tf)
-    df['letter_grade'] = y_pred
+    df['base_grade'] = y_pred
     df['org_score'] = 0
     # run through topic modeling model
     lst_coefs=[]
     msg = False
     for i in range(len(df)):
-        # TODO add some functionality that manages state 
-        # and tells the progress bar to 'progress'. It'll 
-        # probably happen in this block.
-        pct_complete = i / len(df) * 100
-        pct_complete = round(pct_complete)
-        print(pct_complete)
-        st.session_state['grading_progress'] = pct_complete
+        # Pseudo progress bar
         if msg:
             msg.empty()
-            msg = st.info(f"On paper {i+1} out of {len(df)} papers")
+            msg = st.info(f"Grading paper {i+1} out of {len(df)} papers")
         else:
-            msg = st.info(f"On paper {i+1} out of {len(df)} papers")
+            msg = st.info(f"Grading paper {i+1} out of {len(df)} papers")
+            
         p = essay2df(df.essay.iloc[i])
         p['para_id'] = range(1,len(p)+1)
         p['word_count'] = p.paragraphs.apply(word_count)
@@ -548,23 +545,35 @@ def grade_papers(uploadedfile, max_score, new_model=False):
         # shows big problems. multiplied so theres a bigger range of values vs addition.
         my_coef = round(freq * sim_mean, 4)
         # print("my_coef:", my_coef)
-        lst_coefs.append(my_coef) 
+        lst_coefs.append(my_coef)
+    # remove "progress bar"
+    msg.empty() 
     df['org_score'] = lst_coefs
-    # drop columns teachers won't use
-    drop_cols = ['tokenized_essay', 'token_count', 'max_score', 'essay_id']
-    df = df.drop(columns=drop_cols)
-    # swap letters for numbers on letter_grade column
-    df['letter_grade'] = df['letter_grade'].apply(swap_grade)
+    # # swap letters for numbers on letter_grade column
+    # df['letter_grade'] = df['letter_grade'].apply(swap_grade)
     # make sense of org_score
     df['org_score'] = df['org_score'].apply(fix_org_score)
-    df = df.rename(columns={'org_score': "Organization Score", 
-                            "letter_grade":"Letter Grade",
+    # combine scores as average of the base score and the organization score
+    df['final_score'] = round((df['org_score'] + df['base_grade']) / 2, 1)
+    df['final_score'] = df['final_score'].apply(lambda x: x * max_score / 5)
+    # df['final_score'] = df['final_score'].apply(swap_grade)
+    # move essay col to the end
+    cols_at_end = ['essay']
+    df = df[[c for c in df if c not in cols_at_end] 
+        + [c for c in cols_at_end if c in df]]
+    # drop columns teachers won't use and 
+    # make cols more end-user friendly
+    drop_cols = ['tokenized_essay', 'token_count', 'max_score', 'essay_id', 'base_grade', 'org_score']
+    df = df.drop(columns=drop_cols)
+    df = df.rename(columns={"final_score":"Final Score",
                             "file":"File",
                             "page_count":"Page Count",
                             "essay":"Essay",
                             "word_count":"Word Count"})
     # empty data folder again
     empty_data_folder()
+    # tell app not to grade again
+    st.session_state['finished_grading'] == True
     return df
 
 def train_teachers_models(t_df):
@@ -637,7 +646,7 @@ def set_config():
     except:
         im = Image.open("./images/984102_avatar_casual_male_man_person_icon.ico")
     st.set_page_config(
-        page_title="I'm Skip, your grading assistant.",
+        page_title="I'm Ted, your grading assistant.",
         page_icon=im,
     )
     return
