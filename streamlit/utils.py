@@ -554,7 +554,7 @@ def grade_papers(uploadedfile, max_score, new_model=False):
     # make sense of org_score
     df['org_score'] = df['org_score'].apply(fix_org_score)
     # combine scores as average of the base score and the organization score
-    df['final_score'] = round((df['org_score'] + df['base_grade']) / 2, 1)
+    df['final_score'] = (df['org_score'] + df['base_grade']) / 2
     df['final_score'] = df['final_score'].apply(lambda x: x * max_score / 5)
     # df['final_score'] = df['final_score'].apply(swap_grade)
     # move essay col to the end
