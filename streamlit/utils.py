@@ -549,8 +549,6 @@ def grade_papers(uploadedfile, max_score, new_model=False):
     # remove "progress bar"
     msg.empty() 
     df['org_score'] = lst_coefs
-    # # swap letters for numbers on letter_grade column
-    # df['letter_grade'] = df['letter_grade'].apply(swap_grade)
     # make sense of org_score
     df['org_score'] = df['org_score'].apply(fix_org_score)
     # combine scores as average of the base score and the organization score

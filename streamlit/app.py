@@ -168,7 +168,9 @@ if st.session_state['grading'] == True and st.session_state['finished_grading'] 
 if st.session_state['finished_grading'] == True:
     st.markdown("## How to use this spreadsheet:")
     st.markdown("### The next table will have some data that you can use to speed up your grading process. Chaching!")
-    st.markdown("If it looks a little small, hover over the table and a little icon appears on the top right side. Click it, and it will make the table bigger.")
+    st.markdown("This part is for taking a quick look at your students' grades. Maybe there are some scores that stand out as being low or high? Make note of those. On the next step, you'll be able to read the essay.")
+    st.markdown("For now, if there was a page requirement or a word count requirement, grades can be easily adjusted here.")
+    st.markdown("Just **double click** in a grade box and change the grade to what you think it should be. Click anywhere else after changing the number, and it locks that grade in.")
     with st.expander("Click here for a legend to the columns on the table >"):
         st.markdown("* **File:** The name of the file graded. Helpful if students put their own names in the actual file name.")
         st.markdown("* **Word Count:** Approximate number of words in the essay, not including one-letter words.")
@@ -179,13 +181,17 @@ if st.session_state['finished_grading'] == True:
     with st.form("grade_review_choice"):
         st.subheader("Review Grades:")
         grid = AgGrid(st.session_state['grades_df'], editable=True, fit_columns_on_grid_load=True)
+        st.markdown("After editing the grades, accept them by clicking the button below. There will be a new table where the essay can be read, and you'll be able to see how the grades line up.")
         submitted = st.form_submit_button(
             label="Accept Grades >",
         )
         
     if submitted:
+        st.markdown("If the table looks a little small, hover over it and a little icon with 2 arrows appears on the top right side. Click it, and it will make the table bigger.")
+        st.markdown("To read an essay, hover over that individual essay and a bigger box appears with the essay in it, for your reading pleasure.")
         st.dataframe(grid['data'])
         csv = convert_df(grid['data'])
+        st.markdown("At this point, you can go back up and adjust the grades further, or you can download these grades to your computer. Neat!")
         st.download_button(
             label="Download grades as spreadsheet",
             data=csv,
