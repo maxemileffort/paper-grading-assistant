@@ -19,7 +19,7 @@ The training data required very little cleaning. It was tokenized, punctuation a
 
 ### Test and Production Data
 
-This was where there was a sort of hiccup. Some of the actual data had text in various colors due to highlights and font colors used for teaching purposes. That caused problems with the text detection, and is addressed below in section 8. This problem resulted in 0 words being detected for some papers, so it's actually a bit of a major issue. I think it's largely a 
+This was where there was a sort of hiccup. Some of the actual data had text in various colors due to highlights and font colors used for teaching purposes. That caused problems with the text detection, and is addressed below in section 8. This problem resulted in 0 words being detected for some papers, so it's actually a bit of a major issue. I think it's largely an issue of finding a different library for handling PDFs. Because it was only 1-2 files that were affected (out of 60+), for the sake of this project, it was put on the back burner.
 
 ## 3. EDA
 
@@ -56,7 +56,7 @@ While not a recommender system, the goal here is to eventually have a teacher tr
 
 ## 7. Predictions
 
-[Live Demo](https://share.streamlit.io/maxemileffort/paper-grading-assistant/streamlit/app.py)
+<a href="https://share.streamlit.io/maxemileffort/paper-grading-assistant/streamlit/app.py" target="_blank">[Live Demo]</a>
 
 Teachers with student papers (perhaps from a previous year) can drop a .zip file on one of the upload inputs and receive some test grading recommendations. Other users without a student body to source documents from can use the demo papers, which are just a few random Wikipedia articles that the model grades.
 
