@@ -60,6 +60,10 @@ While not a recommender system, the goal here is to eventually have a teacher tr
 
 Teachers with student papers (perhaps from a previous year) can drop a .zip file on one of the upload inputs and receive some test grading recommendations. Other users without a student body to source documents from can use the demo papers, which are just a few random Wikipedia articles that the model grades.
 
+In the end, I ended up with a model that is only accurate ~64% of the time. That being said, on the test data that my wife supplied, she reported that it was quite harsh on grading (which was the secondary success metric). It did award one "A" letter grade to a student that she agreed with, which she was impressed by.
+
+She guessed that the model would have dropped her grading time down to about an hour from the 2-3 hours of grading she had planned for that particular assignment, which is a success for the model! She reported that most of the hour stemmed from finding a way to fit the model's usefulness into her own workflow.
+
 ## 8. Future Improvements
 
 * The biggest problem was that the data used to build the MVP was all black and white. If the text has any highlighting or is colored anything besides black, the PDF reader just doesn't detect it. So that would be one of the first problems that needs solving.
