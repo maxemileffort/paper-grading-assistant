@@ -70,6 +70,8 @@ She guessed that the model would have dropped her grading time down to about an 
 
 * The algorithm used is quite simple, and so it is probably pretty easy to beat. Currently it just correlates word embeddings to a grade, and then looks at topics between paragraphs and tries to grade similarities. I would think that there would need to be some more layers for discerning a real grade, so I would like to build some deep learning models to help grade the papers.
 
+* Feature engineering would lend itself to better results. Using LSTM models that predict compositional structures of the essays, which are then incorporated into the grade-predicting part of the model, I think would help with the accuracy and the problem of the algorithm being simple to beat.
+
 ## 9. Credits
 
 Thanks to Kaggle for the free data, my wife for her guidance, and Mukesh Mithrakumar for being an extrememly knowledgeable and patient Springboard mentor.
